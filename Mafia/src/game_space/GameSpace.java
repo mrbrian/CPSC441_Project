@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.ArrayList;
 
 import clients.Players;
+import clients.PlayerTypes;
 
 public class GameSpace{
 	private Random randGen;
@@ -24,8 +25,6 @@ public class GameSpace{
 	
 	public GameSpace(ArrayList<Players> connected) {
 		players = connected;
-		currentState = gameState.DAY;
-		assignTeams();
 	}
 
 	public void assignTeams() {
@@ -38,11 +37,13 @@ public class GameSpace{
 			
 		for (int i = 0; i < numOfMafia; i++) {
 			int newMafia = randGen.nextInt(players.size());
+			players.get(newMafia).setPlayerType(PlayerTypes.PlayerType.MAFIA);
 			mafioso.add(players.get(newMafia));
 		}
 		
 		for (int i = 0; i < players.size(); i++) {			//cycle through players and add to innocent if not part of mafioso
 			if (mafioso.contains(players.get(i)) == false)
+				players.get(i).setPlayerType(PlayerTypes.PlayerType.MAFIA);
 				innocent.add(players.get(i));
 		}
 	}
@@ -80,7 +81,7 @@ public class GameSpace{
 
 	public void murderVote(Players murderer, Players victim)
 	{
-		if (currentState == gameState.NIGHT) {
+		if (currentState == gameState.NIGHT && mafioso.contains(murderer) == true) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
 				murderCount++;
@@ -117,7 +118,7 @@ public class GameSpace{
 		if (mafioso.contains(condemned) == true){
 			mafioso.remove(condemned);
 		}
-		condemned.setAlive(false);
+		condemned.setIsAlive(false);
 		graveyard.add(condemned);
 	}
 	
@@ -126,7 +127,7 @@ public class GameSpace{
 	public ArrayList <Players> whoCanChatWith(Players speaker) {	
 		ArrayList<Players> listeners = null;
 		
-		if (speaker.getAlive() == false && graveyard.size() > 1)
+		if (speaker.getIsAlive() == false && graveyard.size() > 1)
 			listeners = graveyard;
 		
 		if (currentState == gameState.DAY)
