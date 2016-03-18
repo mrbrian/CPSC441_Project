@@ -70,7 +70,7 @@ class TCPClient {
 		            System.out.println("Server: " + line);
 	        	}   
 	        	
-	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
+	            System.out.print("Please username: ");
 	            line = inFromUser.readLine(); 
 	        }
 	        
