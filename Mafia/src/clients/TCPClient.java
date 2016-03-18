@@ -13,8 +13,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.CharBuffer; 
 
-class TCPClient { 
-
+class TCPClient {
+	
     public static void main(String args[]) throws Exception 
     { 
         if (args.length != 2)
@@ -70,7 +70,7 @@ class TCPClient {
 		            System.out.println("Server: " + line);
 	        	}   
 	        	
-	            System.out.print("Please username: ");
+	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
 	            line = inFromUser.readLine(); 
 	        }
 	        
