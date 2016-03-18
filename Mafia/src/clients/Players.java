@@ -1,27 +1,43 @@
 package clients;
 
+import java.util.ArrayList;
+
 public class Players {
 	
 	private String pseudonym;
-	private String playerType;
-	private int lynchCount;
+	private boolean isAlive;
+	private PlayerTypes.PlayerType type;
+	private ArrayList<String> votedWho;
 	
 	public Players(){
-		lynchCount = 0;
+		isAlive = false;
+		votedWho = new ArrayList<>();
+		type = null;
+	}
+	
+	public void setType(PlayerTypes.PlayerType type){
+		this.type = type;
+	}
+	
+	public PlayerTypes.PlayerType getType(){
+		return type;
 	}
 	
 	// Set the players pseudonym 
-	public void setPseudonum(String pseudonym){
+	public void setPseudonym(String pseudonym){
 		this.pseudonym = pseudonym;
 	}
 	
-	// Set the players type (for now, just Innocent or Mafioso)
-	public void setPlayerType(String playerType){
-		this.playerType = playerType;
+	// Get the players pseudonym
+	public String getPseudonym(){
+		return pseudonym;
 	}
 	
-	// Increase the lynch vote for the player
-	public void increaseLynchCount(){
-		lynchCount++;
+	public void setIsAlive(boolean isAlive){
+		this.isAlive = isAlive;
+	}
+	
+	public boolean getIsAlive(){
+		return isAlive;
 	}
 }
