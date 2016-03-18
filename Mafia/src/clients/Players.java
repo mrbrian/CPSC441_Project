@@ -5,22 +5,53 @@ import java.util.ArrayList;
 public class Players {
 	
 	private String pseudonym;
+	
+	private String IPAddress;
+	private String portNumber;
+	
 	private boolean isAlive;
-	private PlayerTypes.PlayerType type;
 	private ArrayList<String> votedWho;
+	
+	
+	
+	/*
+	 *	Client initiates	 
+	 * 		- Reply from server
+	 * 		
+	 * 	Server asks for
+	 * 		- Authentication details
+	 * 		- Display to player
+	 *  
+	 *  Connection related things
+	 *  
+	 *  Debug info 
+	 *  	- 
+	 *  
+	 * 
+	 * 
+	 * */
+	
+	
 	
 	public Players(){
 		isAlive = false;
 		votedWho = new ArrayList<>();
-		type = null;
 	}
 	
-	public void setType(PlayerTypes.PlayerType type){
-		this.type = type;
+	public void setIPAddress(String IPAddress){
+		this.IPAddress = IPAddress;
 	}
 	
-	public PlayerTypes.PlayerType getType(){
-		return type;
+	public String getIPAddress(){
+		return IPAddress;
+	}
+	
+	public void setPortNumber(String portNumber){
+		this.portNumber = portNumber;
+	}
+	
+	public String getPortNumber(){
+		return portNumber;
 	}
 	
 	// Set the players pseudonym 
