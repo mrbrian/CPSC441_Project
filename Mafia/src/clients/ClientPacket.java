@@ -130,4 +130,11 @@ public class ClientPacket {
 		
 		return super.equals(obj);
 	}
+	
+	/* Convenience method that returns the size of the packet
+	 * 4 = 2 bytes (for the enum type) + 2 bytes (for the data size)
+	 * */
+	public int getPacketSize(){
+		return 4 + data.length;
+	}
 }

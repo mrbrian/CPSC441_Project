@@ -114,5 +114,6 @@ public class ServerPacket
 		}
 		
 		return super.equals(o);
-	}	
+	}
+	
 }
