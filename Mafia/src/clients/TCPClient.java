@@ -22,12 +22,17 @@ class TCPClient {
 		
 		switch (p.pType)
 		{
-			case Acknowledge:
-				System.out.println(p.msg);	            
+			default:
+				System.out.println(String.format("%s: %s", p.pType.toString(), p.msg));	            
 				break;
 		}	
 	}
 
+	
+	public static void parseCommand()
+	{
+		
+	}
 	
     public static void main(String args[]) throws Exception 
     { 
@@ -48,34 +53,37 @@ class TCPClient {
 	        DataInputStream inData = new DataInputStream(clientSocket.getInputStream());
 	
 	        // Initialize user input stream
-	        String line; 
+	        String line = ""; 
 	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
 
 	        // expect a welcome packet from server.
 	        
-	        boolean isDataAvailable = false;
-	        
-	        while (!isDataAvailable)
-	        {
-	        	isDataAvailable = inBuffer.ready();		        
-	        }
-	        
-	        while (isDataAvailable)
-	        {
-	        	// read a packet
-	        	ServerPacket p = ServerPacket.read(inData);
-	        	processPacket(p); // process data	        	
-	        	isDataAvailable = inBuffer.ready();
-		        
-	        }
+	        int isDataAvailable = 0;
 	        
 	        // Get user input and send to the server
 	        // Display the echo meesage from the server
 	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-	        line = inFromUser.readLine(); 
+	        //line = inFromUser.readLine(); 
         
 	        while (!line.equals("logout"))
-	        {           
+	        {   
+		        // wait for data!
+		        while (isDataAvailable == 0)   // its blocking.
+		        {
+		        	isDataAvailable = inData.available(); 
+		        }
+		        
+		        // read the data!
+		        while (isDataAvailable > 0)
+		        {
+		        	// read a packet
+		        	
+		        	ServerPacket p = ServerPacket.read(inData);
+		        	processPacket(p); // process data	       
+
+		        	isDataAvailable = inData.available();    
+		        }
+		        /*
 	            String[] split = line.split(" ");
 	            split[0] = split[0].replaceAll("\\s+", "");		// trim whitespace from command
 	            
@@ -101,7 +109,7 @@ class TCPClient {
 		            line = inBuffer.readLine();
 		            System.out.println("Server: " + line);
 	        	}   
-	        	
+	        	*/
 	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
 	            line = inFromUser.readLine(); 
 	        }

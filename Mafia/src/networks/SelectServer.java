@@ -17,22 +17,13 @@ public class SelectServer
 {	
     public static int BUFFERSIZE = 256;
     
-    void SendPacket(ServerPacket pkt)//, dest)
+    static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
     {
-    //	pkt
-    }
-    
-    /*
-    void ProcessPacket (byte[] p)
-    {
-    	p.read
-    	case (type_)
-    	{
-    		case ClientPacket.PacketType.CreateAccount:
-    			
-    			break;
-    	}
-    }*/
+    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
+    	p.write(inBuffer);
+    	inBuffer.rewind();
+    	ch.write(inBuffer);    	
+    }    
     
     public static void main(String args[]) throws Exception 
     {
@@ -105,13 +96,8 @@ public class SelectServer
                         			new byte[]{1,2,3,4,5}
                         		);
                         
-                        inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
-                        p.write(inBuffer);
-
-                        inBuffer.rewind();
-                        cchannel.write(inBuffer);		                    
-                        
-                    } 
+                        sendPacket(p, cchannel);                        	                   
+                    }
                     else 
                     {
                     	SelectableChannel sc = key.channel();
