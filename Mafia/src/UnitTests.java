@@ -8,25 +8,53 @@ import networks.ServerPacket;
 public class UnitTests {
 
 	@Test
-	public void stream_Test1() {
+	public void serverPacket_readWrite_Test1_Pass() 
+	{
 		ServerPacket p = new ServerPacket(
-				ServerPacket.PacketType.ServerMessage,
-				5,
-				0,
-				new String[]{"Hello"},
-					new byte[]{}
-				);
+				ServerPacket.PacketType.BanUser,
+				"Hello",
+				new byte[]{6,6,6}
+			);		
 		
 		int BUFFERSIZE = 256;
 		
 		ByteBuffer bb = ByteBuffer.allocateDirect(BUFFERSIZE);
-		byte[] expected = new byte[]{0};
+		ServerPacket expected = p;
 		p.write(bb);
-		byte[] actual = new byte[BUFFERSIZE];
-		bb.get(actual);
 		
-		assertEquals(expected, actual);
-		//fail("Not yet implemented");
+		bb.flip();
+		
+		ServerPacket actual = ServerPacket.read(bb);
+		if (!expected.equals(actual))
+			fail("non match");
+		//assertArrayEquals(expected, actual);
+	}
+
+	@Test
+	public void serverPacket_readWrite_Test1_Fail() 
+	{
+		ServerPacket expected = new ServerPacket(
+				ServerPacket.PacketType.BanUser,
+				"Hello",
+				new byte[]{6,6,6,6}
+			);		
+		
+		ServerPacket p = new ServerPacket(
+				ServerPacket.PacketType.BanUser,
+				"Hello",
+				new byte[]{6,6,6}
+			);		
+		
+		int BUFFERSIZE = 256;
+		
+		ByteBuffer bb = ByteBuffer.allocateDirect(BUFFERSIZE);
+		p.write(bb);
+		
+		bb.flip();
+		
+		ServerPacket actual = ServerPacket.read(bb);
+		if (expected.equals(actual))
+			fail("shouldn't match");
 	}
 
 }

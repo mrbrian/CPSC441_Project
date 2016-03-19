@@ -3,9 +3,11 @@ package networks;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
  
-public class ServerPacket 
+public class ServerPacket
 {
 	public enum PacketType
 	{
@@ -21,20 +23,20 @@ public class ServerPacket
 	public PacketType pType;
 	public int msgLength;
 	public int dataSize;
-	public String[] msgs;
-	public byte[] data;	
+	public String msg;
+	public byte[] data;		
 	
 	public ServerPacket (
 			PacketType t,
-			int msgL,
-			int dataS,
-			String[] msgArr,
+			String m,
 			byte[] dataArr)
 	{
 		pType = t;
-		msgL = msgLength;
-		msgLength = dataS;
-		msgs = msgArr;
+		dataSize = dataArr.length;
+		msg = m;
+		
+		msgLength = msg.length();
+		
 		data = dataArr;
 	}
 	
@@ -43,14 +45,57 @@ public class ServerPacket
 		buf.putInt(pType.ordinal());
 		buf.putInt(msgLength);
 		buf.putInt(dataSize);
-		for(int i = 0 ; i < msgs.length; i++)
-		{
-			String s = msgs[i];
-			buf.put(s.getBytes());
-		}
+		
+		String s = msg;
+		buf.put(s.getBytes());
+		
 		buf.put(data);
 	}
 	
+	public static ServerPacket read(ByteBuffer buf)
+	{
+		
+		PacketType pt = PacketType.values()[buf.getInt()];
+		int ml = buf.getInt();
+		int ds = buf.getInt();
+
+		byte[] msgBytes = new byte[ml];
+		byte[] dataBytes = new byte[ds];
+
+		buf.get(msgBytes);
+		String msg = new String(msgBytes, StandardCharsets.UTF_8);
+				
+		buf.get(dataBytes);
+		
+		ServerPacket result = new ServerPacket(pt, msg, dataBytes);		
+				
+		return result;	
+	}
+
+	@Override
+	public boolean equals(Object o) 
+	{		
+		ServerPacket other = (ServerPacket)o;
+		
+		if (other != null)
+		{
+			if (pType != other.pType)
+				return false;
+			if (msgLength != other.msgLength)
+				return false;
+			if (dataSize != other.dataSize)
+				return false;
+			if (!msg.equals(other.msg))
+				return false;
+			if (!msg.equals(other.msg))
+				return false;
+			return true;
+		}
+		
+		return super.equals(o);
+	}
+	
+	/*
 	public void write(ObjectOutputStream out)
 	{
 		try
@@ -65,5 +110,5 @@ public class ServerPacket
 		{
             System.out.println(e.getMessage());
 		}
-	}
+	}*/
 }
