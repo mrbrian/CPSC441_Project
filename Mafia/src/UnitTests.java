@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
@@ -7,7 +8,18 @@ import networks.ServerPacket;
 import networks.ServerPacket.PacketType;
 
 public class UnitTests {
-
+/*
+	@Test
+	public void dataInputStream_test1() 
+	{
+		DataInputStream dis = new DataInputStream(InputStream);		
+		
+		int e = 1;
+		int a = dis.available();
+		
+		assertEquals(e, a);
+	}
+*/
 	@Test
 	public void serverPacket_readWrite_Test1_Pass() 
 	{
