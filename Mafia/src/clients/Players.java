@@ -82,4 +82,9 @@ public class Players {
 	public boolean getIsAlive(){
 		return isAlive;
 	}
+<<<<<<< HEAD
 }
+=======
+}
+
+>>>>>>> origin/Tyler
