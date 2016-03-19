@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
  
 public class ServerPacket
@@ -107,7 +108,7 @@ public class ServerPacket
 				return false;
 			if (!msg.equals(other.msg))
 				return false;
-			if (!msg.equals(other.msg))
+			if (!Arrays.equals(data, other.data))
 				return false;
 			return true;
 		}

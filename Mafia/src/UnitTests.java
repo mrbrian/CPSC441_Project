@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import networks.ServerPacket;
+import networks.ServerPacket.PacketType;
 
 public class UnitTests {
 
@@ -25,9 +26,12 @@ public class UnitTests {
 		bb.flip();
 		
 		ServerPacket actual = ServerPacket.read(bb);
-		if (!expected.equals(actual))
-			fail("non match");
-		//assertArrayEquals(expected, actual);
+		
+		assertEquals(expected.pType, actual.pType);
+		assertEquals(expected.msgLength, actual.msgLength);
+		assertEquals(expected.dataSize, actual.dataSize);
+		assertEquals(expected.msg, actual.msg);
+		assertArrayEquals(expected.data, actual.data);
 	}
 
 	@Test
@@ -51,10 +55,11 @@ public class UnitTests {
 		p.write(bb);
 		
 		bb.flip();
-		
+
 		ServerPacket actual = ServerPacket.read(bb);
+		
 		if (expected.equals(actual))
-			fail("shouldn't match");
+			fail("non match");
 	}
 
 }
