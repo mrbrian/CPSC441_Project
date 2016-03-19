@@ -1,10 +1,12 @@
 package networks;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
  
 public class ServerPacket
@@ -51,7 +53,7 @@ public class ServerPacket
 		
 		buf.put(data);
 	}
-	
+
 	public static ServerPacket read(ByteBuffer buf)
 	{
 		
@@ -66,6 +68,25 @@ public class ServerPacket
 		String msg = new String(msgBytes, StandardCharsets.UTF_8);
 				
 		buf.get(dataBytes);
+		
+		ServerPacket result = new ServerPacket(pt, msg, dataBytes);		
+				
+		return result;	
+	}
+
+	public static ServerPacket read(DataInputStream buf) throws IOException
+	{		
+		PacketType pt = PacketType.values()[buf.readInt()];
+		int ml = buf.readInt();
+		int ds = buf.readInt();
+
+		byte[] msgBytes = new byte[ml];
+		byte[] dataBytes = new byte[ds];
+
+		buf.readFully(msgBytes);
+		String msg = new String(msgBytes, StandardCharsets.UTF_8);
+				
+		buf.readFully(dataBytes);
 		
 		ServerPacket result = new ServerPacket(pt, msg, dataBytes);		
 				
@@ -87,28 +108,11 @@ public class ServerPacket
 				return false;
 			if (!msg.equals(other.msg))
 				return false;
-			if (!msg.equals(other.msg))
+			if (!Arrays.equals(data, other.data))
 				return false;
 			return true;
 		}
 		
 		return super.equals(o);
-	}
-	
-	/*
-	public void write(ObjectOutputStream out)
-	{
-		try
-		{
-			out.writeObject(pType);
-			out.writeInt(msgLength);
-			out.writeInt(dataSize);
-			out.writeObject(msgs);
-			out.write(data);
-		}
-		catch(IOException e)
-		{
-            System.out.println(e.getMessage());
-		}
-	}*/
+	}	
 }

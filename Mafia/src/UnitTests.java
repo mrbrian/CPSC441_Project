@@ -1,13 +1,26 @@
 import static org.junit.Assert.*;
 
+import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import clients.ClientPacket;
 import networks.ServerPacket;
+import networks.ServerPacket.PacketType;
 
 public class UnitTests {
-
+/*
+	@Test
+	public void dataInputStream_test1() 
+	{
+		DataInputStream dis = new DataInputStream(InputStream);		
+		
+		int e = 1;
+		int a = dis.available();
+		
+		assertEquals(e, a);
+	}
+*/
 	@Test
 	public void serverPacket_readWrite_Test1_Pass() 
 	{
@@ -26,9 +39,12 @@ public class UnitTests {
 		bb.flip();
 		
 		ServerPacket actual = ServerPacket.read(bb);
-		if (!expected.equals(actual))
-			fail("non match");
-		//assertArrayEquals(expected, actual);
+		
+		assertEquals(expected.pType, actual.pType);
+		assertEquals(expected.msgLength, actual.msgLength);
+		assertEquals(expected.dataSize, actual.dataSize);
+		assertEquals(expected.msg, actual.msg);
+		assertArrayEquals(expected.data, actual.data);
 	}
 
 	@Test
@@ -52,10 +68,11 @@ public class UnitTests {
 		p.write(bb);
 		
 		bb.flip();
-		
+
 		ServerPacket actual = ServerPacket.read(bb);
+		
 		if (expected.equals(actual))
-			fail("shouldn't match");
+			fail("non match");
 	}
 	
 	@Test
