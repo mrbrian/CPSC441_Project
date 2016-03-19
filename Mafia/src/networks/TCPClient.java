@@ -47,8 +47,9 @@ class TCPClient {
             
 	        // Initialize input and an output stream for the connection(s)
 	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
-	        BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
+	        //BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
 	        DataInputStream inData = new DataInputStream(clientSocket.getInputStream());
+	        InputStream in = clientSocket.getInputStream();
 	
 	        // Initialize user input stream
 	        String line = ""; 
@@ -61,16 +62,16 @@ class TCPClient {
 	        // Get user input and send to the server
 	        // Display the echo meesage from the server
 	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-	        //line = inFromUser.readLine(); 
         
 	        while (!line.equals("logout"))
 	        {   
 		        // wait for data!
-		        while (isDataAvailable == 0)   // its blocking.
-		        {
-		        	isDataAvailable = inData.available(); 
+		        while (isDataAvailable == 0)   
+		        {		        	
+		        	isDataAvailable = in.available();// inData.available(); 
 		        }
-		        
+
+		        System.out.print(isDataAvailable);
 		        // read the data!
 		        while (isDataAvailable > 0)
 		        {
@@ -78,8 +79,8 @@ class TCPClient {
 		        	
 		        	ServerPacket p = ServerPacket.read(inData);
 		        	processPacket(p); // process data	       
-
-		        	isDataAvailable = inData.available();    
+		        	//inData.skipBytes(5);
+		        	isDataAvailable = in.available();		        	
 		        }
 		        /*
 	            String[] split = line.split(" ");

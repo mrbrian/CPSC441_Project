@@ -8,18 +8,7 @@ import networks.ServerPacket;
 import networks.ServerPacket.PacketType;
 
 public class UnitTests {
-/*
-	@Test
-	public void dataInputStream_test1() 
-	{
-		DataInputStream dis = new DataInputStream(InputStream);		
-		
-		int e = 1;
-		int a = dis.available();
-		
-		assertEquals(e, a);
-	}
-*/
+
 	@Test
 	public void serverPacket_readWrite_Test1_Pass() 
 	{
@@ -44,8 +33,8 @@ public class UnitTests {
 		assertEquals(expected.dataSize, actual.dataSize);
 		assertEquals(expected.msg, actual.msg);
 		assertArrayEquals(expected.data, actual.data);
-	}
-
+	}	
+		
 	@Test
 	public void serverPacket_readWrite_Test1_Fail() 
 	{
