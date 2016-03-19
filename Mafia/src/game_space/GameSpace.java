@@ -3,17 +3,19 @@ package game_space;
 import java.util.Random;
 import java.util.ArrayList;
 
-import clients.Players;
-import clients.PlayerTypes;
-
 public class GameSpace{
 	private Random randGen;
 	private Players lynchVictim = null;
 	private Players murderVictim = null;
 	private boolean lynchOngoing;
 	private boolean murderOngoing;
+	private boolean canLynch;
+	private boolean canMurder;
 	private int lynchCount = 0;
 	private int murderCount = 0;
+	private long dayTime = 300000;		//300000ms = 5min
+	private long nightTime = 150000;	//150000ms = 2.5min
+	private long switchTime = 0;
 	
 	private ArrayList<Players> players;
 	private ArrayList<Players> innocent;
@@ -21,7 +23,7 @@ public class GameSpace{
 	private ArrayList<Players> graveyard;
 	private int mafiaFraction = 3;			//fraction = 1/mafiaFraction
 	private enum gameState {DAY, NIGHT};
-	private gameState currentState;
+	private gameState currentState = gameState.DAY;
 	
 	public GameSpace(ArrayList<Players> connected) {
 		players = connected;
@@ -48,9 +50,47 @@ public class GameSpace{
 		}
 	}
 	
-	public void lynchVote(Players lyncher, Players victim)
-	{
+	public gameState updateState(long callTime) {
+		if (switchTime == 0)
+			switchTime = callTime;
 		if (currentState == gameState.DAY) {
+			if (switchTime + dayTime <= callTime)
+				switchTime = callTime;
+				nextNight();
+		}
+		if (currentState == gameState.NIGHT) {
+			if (switchTime + nightTime <= callTime)
+				switchTime = callTime;
+				nextDay();
+		}
+		return currentState;
+	}
+	
+	public void nextDay() {
+		voteReset();
+		currentState = gameState.DAY;
+		canLynch = true;
+	}
+	
+	public void nextNight() {
+		voteReset();
+		currentState = gameState.NIGHT;
+		canMurder = true;
+	}
+	
+	public void voteReset() {
+		lynchVictim = null;
+		murderVictim = null;
+		lynchOngoing = false;
+		murderOngoing = false;
+		canLynch = false;
+		canMurder = false;
+		lynchCount = 0;
+		murderCount = 0;
+	}
+	
+	public void lynchVote(Players lyncher, Players victim) {
+		if (canLynch == true) {
 			if (lynchVictim == null && lynchOngoing == false) {
 				lynchVictim = victim;
 				lynchCount++;
@@ -64,24 +104,20 @@ public class GameSpace{
 				lynchCount++;
 				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
 			}
-			lynchCheck();
 		}
 	}
 	
-	public void lynchCheck() {
+	public Players lynchCheck() {
 		if (lynchCount > (players.size()/2)) {
 			kill(lynchVictim);
-			//System.out.println(lynchVictim + " has been lynched!");
-			lynchVictim = null;
-			lynchOngoing = false;
-			lynchCount = 0;
-			//end the day
+			return lynchVictim;
 		}
+		else
+			return null;
 	}
 
-	public void murderVote(Players murderer, Players victim)
-	{
-		if (currentState == gameState.NIGHT && mafioso.contains(murderer) == true) {
+	public void murderVote(Players murderer, Players victim) {
+		if (canMurder == true && mafioso.contains(murderer) == true) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
 				murderCount++;
@@ -95,19 +131,16 @@ public class GameSpace{
 				murderCount++;
 				//System.out.println(murderer + " has voted to murder " + victim + " ["murderCount "/" players.size() + "]");
 			}
-			murderCheck();
 		}
 	}
 	
-	public void murderCheck() {
+	public Players murderCheck() {
 		if (murderCount > (mafioso.size()/2)) {
 			kill(murderVictim);
-			//System.out.println(murderVictim + " has been murdered!");
-			murderVictim = null;
-			murderOngoing = false;
-			murderCount = 0;
-			//end the night
+			return murderVictim;
 		}
+		else
+			return null;
 	}	
 	
 	public void kill(Players condemned) {
@@ -122,6 +155,18 @@ public class GameSpace{
 		graveyard.add(condemned);
 	}
 	
+	public gameState getState() {
+		return currentState;
+	}
+	
+	public PlayerTypes.PlayerType checkWin() {
+		if(mafioso.isEmpty() == true)
+			return PlayerTypes.PlayerType.INNO;
+		else if (mafioso.size() > innocent.size())
+			return PlayerTypes.PlayerType.MAFIA;
+		else
+			return null;
+	}
 	
 	//returns an ArrayList of players with whom the player can speak based on current state, less the player
 	public ArrayList <Players> whoCanChatWith(Players speaker) {	

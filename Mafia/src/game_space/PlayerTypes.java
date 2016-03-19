@@ -1,5 +1,4 @@
-
-package clients;
+package game_space;
 
 public class PlayerTypes {
 	
