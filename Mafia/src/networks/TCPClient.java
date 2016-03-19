@@ -15,6 +15,18 @@ import java.nio.CharBuffer;
 
 class TCPClient { 
 
+	public static void processPacket(ServerPacket p)
+	{
+		ServerPacket.PacketType pt;
+		
+		switch (p.pType)
+		{
+			case Acknowledge:
+				System.out.println(p.msg);	            
+				break;
+		}	
+	}
+	
     public static void main(String args[]) throws Exception 
     { 
         if (args.length != 2)
@@ -37,6 +49,24 @@ class TCPClient {
 	        String line; 
 	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
 
+	        // expect a welcome packet from server.
+	        
+	        boolean isDataAvailable = false;
+	        
+	        while (!isDataAvailable)
+	        {
+	        	isDataAvailable = inBuffer.ready();		        
+	        }
+	        
+	        while (isDataAvailable)
+	        {
+	        	// read a packet
+	        	ServerPacket p = ServerPacket.read(inData);
+	        	processPacket(p); // process data	        	
+	        	isDataAvailable = inBuffer.ready();
+		        
+	        }
+	        
 	        // Get user input and send to the server
 	        // Display the echo meesage from the server
 	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
