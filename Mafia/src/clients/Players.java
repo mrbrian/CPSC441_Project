@@ -83,4 +83,3 @@ public class Players {
 		return isAlive;
 	}
 }
-
