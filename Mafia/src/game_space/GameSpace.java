@@ -1,21 +1,11 @@
 package game_space;
 
-<<<<<<< HEAD
 import java.util.Random;
-=======
-
-import java.util.Random;
-
->>>>>>> origin/Tyler
 import java.util.ArrayList;
 
 import clients.Players;
 
 public class GameSpace{
-<<<<<<< HEAD
-=======
-	
->>>>>>> origin/Tyler
 	private Random randGen;
 	private Players lynchVictim = null;
 	private Players murderVictim = null;
@@ -55,10 +45,6 @@ public class GameSpace{
 			if (mafioso.contains(players.get(i)) == false)
 				innocent.add(players.get(i));
 		}
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/Tyler
 	}
 	
 	public void lynchVote(Players lyncher, Players victim)
