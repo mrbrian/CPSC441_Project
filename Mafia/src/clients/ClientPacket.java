@@ -1,10 +1,11 @@
 package clients;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class ClientPacket {
 	
-	private enum PacketType{
+	public enum PacketType{
 		CreateAccount,
 		Login,
 		Logout,
@@ -23,9 +24,9 @@ public class ClientPacket {
 	public byte[] data;
 	
 	// Class constructor initializing the fields
-	public ClientPacket(PacketType type, int dataSize, byte[] data){
+	public ClientPacket(PacketType type, byte[] data){
 		this.type = type;
-		this.dataSize = dataSize;
+		this.dataSize = data.length;
 		this.data = data;
 	}
 	
@@ -42,12 +43,35 @@ public class ClientPacket {
 	 * Return is of type ClientPacket because
 	 * we need to return multiple things
 	 * */
-	public ClientPacket read(ByteBuffer buffer){
+	public static ClientPacket read(ByteBuffer buffer){
 		PacketType typeLocal = PacketType.values()[buffer.getInt()];
 		int sizeLocal = buffer.getInt();
 		byte[] dataBytes = new byte[sizeLocal];
 		buffer.get(dataBytes);
 		
-		return new ClientPacket(typeLocal, sizeLocal, dataBytes);
-	}	
+		return new ClientPacket(typeLocal, dataBytes);
+	}
+	
+	// Used for JUnit testing
+	@Override
+	public boolean equals(Object obj){
+		ClientPacket otherPacket = (ClientPacket)obj;
+		
+		if (otherPacket != null){
+			if(type != otherPacket.type){
+				return false;
+			}
+			if(dataSize != otherPacket.dataSize){
+				return false;
+			}
+			
+			if(!Arrays.equals(data, otherPacket.data)){
+				return false;
+			}
+			
+			return true;
+		}
+		
+		return super.equals(obj);
+	}
 }
