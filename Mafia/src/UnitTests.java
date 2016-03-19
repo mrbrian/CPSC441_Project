@@ -68,6 +68,7 @@ public class UnitTests {
 		ClientPacket expected = clientPacket;
 		clientPacket.write(bb);
 		
+		
 		bb.flip();
 		
 		ClientPacket actual = ClientPacket.read(bb);

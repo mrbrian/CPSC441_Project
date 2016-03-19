@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ClientPacket {
+	private static final int USR_PASS_LENGTHS = 4;
 	
 	public enum PacketType{
 		CreateAccount,
@@ -38,6 +39,61 @@ public class ClientPacket {
 		buffer.putInt(dataSize);
 		buffer.put(data);
 	}
+	
+	public ClientPacket loginRegPacket(String username, String password){
+		int totalSize = username.length() + password.length() + 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putShort((short)username.length());
+		buffer.put(username.getBytes());
+		
+		buffer.putShort((short)password.length());
+		buffer.put(password.getBytes());
+		
+		buffer.flip();
+		
+		byte[] credentials = new byte[totalSize];
+		buffer.get(credentials);
+		
+		return new ClientPacket(PacketType.Login, credentials);
+	}
+	
+	public ClientPacket logout(){
+		return new ClientPacket(PacketType.Logout, null);
+	}
+	
+	public ClientPacket setAlias(String alias){
+		return new ClientPacket(PacketType.SetAlias, alias.getBytes());
+	}
+	
+	public ClientPacket join(String roomId){
+		return new ClientPacket(PacketType.Join, roomId.getBytes());
+	}
+	
+	public ClientPacket invite(String username){
+		return new ClientPacket(PacketType.Invite, username.getBytes());
+	}
+	
+	public ClientPacket listUser(){
+		return new ClientPacket(PacketType.ListUsers, null);
+	}
+	
+	public ClientPacket listRoom(){
+		return new ClientPacket(PacketType.ListRooms, null);
+	}
+	
+	public ClientPacket chat(String msg){
+		return new ClientPacket(PacketType.Chat, msg.getBytes());
+	}
+	
+	public ClientPacket vote(String username){
+		return new ClientPacket(PacketType.Vote, username.getBytes());
+	}
+	
+	public ClientPacket getGameStatus(){
+		return new ClientPacket(PacketType.GetGameStatus, null);
+	}
+
 	
 	/* Method to read from the ByteBuffer
 	 * Return is of type ClientPacket because
