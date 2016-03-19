@@ -1,4 +1,4 @@
-package networks;
+package clients;
 
 /*
  * A simple TCP client that sends messages to a server and display the message
@@ -13,8 +13,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.CharBuffer; 
 
-class TCPClient { 
-
+class TCPClient {
+	
     public static void main(String args[]) throws Exception 
     { 
         if (args.length != 2)

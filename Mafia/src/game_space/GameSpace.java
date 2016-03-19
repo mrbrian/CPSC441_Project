@@ -1,11 +1,14 @@
 package game_space;
 
+
 import java.util.Random;
+
 import java.util.ArrayList;
 
 import clients.Players;
 
 public class GameSpace{
+	
 	private Random randGen;
 	private Players lynchVictim = null;
 	private Players murderVictim = null;
@@ -45,6 +48,7 @@ public class GameSpace{
 			if (mafioso.contains(players.get(i)) == false)
 				innocent.add(players.get(i));
 		}
+
 	}
 	
 	public void lynchVote(Players lyncher, Players victim)
@@ -117,7 +121,7 @@ public class GameSpace{
 		if (mafioso.contains(condemned) == true){
 			mafioso.remove(condemned);
 		}
-		condemned.setAlive(false);
+		condemned.setIsAlive(false);
 		graveyard.add(condemned);
 	}
 	
@@ -126,7 +130,7 @@ public class GameSpace{
 	public ArrayList <Players> whoCanChatWith(Players speaker) {	
 		ArrayList<Players> listeners = null;
 		
-		if (speaker.getAlive() == false && graveyard.size() > 1)
+		if (speaker.getIsAlive() == false && graveyard.size() > 1)
 			listeners = graveyard;
 		
 		if (currentState == gameState.DAY)
