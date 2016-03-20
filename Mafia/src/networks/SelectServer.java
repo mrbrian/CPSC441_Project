@@ -110,7 +110,7 @@ public class SelectServer {
                     	SelectableChannel sc = key.channel();
                     	
                         SocketChannel cchannel = (SocketChannel)sc;
-                        /*if (key.isReadable())
+                        if (key.isReadable())
                         {	                        
                             // Open input and output streams
                             inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
@@ -161,15 +161,15 @@ public class SelectServer {
 	                            line = cBuffer.toString();
 	                            System.out.print("TCP Client: " + line);
 
-                            	String[] strSplit = line.split(" ");	// split up commands
+                            	strSplit = line.split(" ");	// split up commands
                             	strSplit[0] = strSplit[0].replaceAll("\\s+", "");	// trim whitespace
                             	
 	                            if (line.equals("list\n"))
 	                            {   
-	                            	String outputStr = getFileList(".");
-	                            	int strLen = outputStr.length();
+	                            	outputStr = getFileList(".");
+	                            	strLen = outputStr.length();
 	                            	
-	                            	ByteBuffer bufferSize = ByteBuffer.allocate(4);		// send the size of message
+	                            	bufferSize = ByteBuffer.allocate(4);		// send the size of message
 		                            bufferSize.putInt(strLen);
 		                            bufferSize.rewind();
 		                            cchannel.write(bufferSize);
@@ -189,7 +189,7 @@ public class SelectServer {
 		                            filename = filename.replaceAll("\\s+", "");			// trim whitespace
 		                            System.out.print("Open file: " + filename + "\n");
 
-	                            	ByteBuffer bufferSize = ByteBuffer.allocate(8);
+	                            	bufferSize = ByteBuffer.allocate(8);
 		                            byte[] data = getFile(filename);
 		                            
 		                            if (data == null)		// error while reading file 
@@ -235,7 +235,7 @@ public class SelectServer {
 	                            }
 
                             }                    	
-                    	}*/
+                    	}
                     }
                 } // end of while (readyItor.hasNext()) 
             } // end of while (!terminated)
