@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
+import clients.ClientPacket;
 import networks.ServerPacket;
 import networks.ServerPacket.PacketType;
 
@@ -62,5 +63,24 @@ public class UnitTests {
 		if (expected.equals(actual))
 			fail("non match");
 	}
-
+	
+	@Test
+	public void clientPacket_readWrite_Test1_Pass(){
+		ClientPacket clientPacket = new ClientPacket(
+				ClientPacket.PacketType.Login, new byte[]{6,6,6});
+		
+		int BUFFERSIZE = 256;
+		ByteBuffer bb = ByteBuffer.allocateDirect(BUFFERSIZE);
+		ClientPacket expected = clientPacket;
+		clientPacket.write(bb);
+		
+		
+		bb.flip();
+		
+		ClientPacket actual = ClientPacket.read(bb);
+		
+		if(!expected.equals(actual)){
+			fail("non match");
+		}
+	}
 }

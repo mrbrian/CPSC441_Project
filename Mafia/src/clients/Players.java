@@ -9,6 +9,8 @@ public class Players {
 	private String IPAddress;
 	private String portNumber;
 	
+	private PlayerTypes.PlayerType playerType;
+	
 	private boolean isAlive;
 	private ArrayList<String> votedWho;
 	
@@ -36,6 +38,15 @@ public class Players {
 	public Players(){
 		isAlive = false;
 		votedWho = new ArrayList<>();
+		playerType = null;
+	}
+	
+	public void setPlayerType(PlayerTypes.PlayerType playerType){
+		this.playerType = playerType;
+	}
+	
+	public PlayerTypes.PlayerType getPlayerType(){
+		return playerType;
 	}
 	
 	public void setIPAddress(String IPAddress){

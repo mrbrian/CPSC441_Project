@@ -13,8 +13,7 @@ import java.nio.channels.*;
 import java.nio.charset.*;
 import java.util.*;
 
-public class SelectServer 
-{	
+public class SelectServer {
     public static int BUFFERSIZE = 256;
     
     static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
@@ -56,6 +55,13 @@ public class SelectServer
 
         // Register that the server selector is interested in connection requests
         tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+
+        // Declare a UDP server socket and a datagram packet
+        DatagramChannel udp_channel = null;        
+        udp_channel = DatagramChannel.open();
+        udp_channel.socket().bind(isa);
+        udp_channel.configureBlocking(false);
+        udp_channel.register(selector, SelectionKey.OP_READ);
         
         // Wait for something happen among all registered sockets
         try {
@@ -92,20 +98,19 @@ public class SelectServer
                         cchannel.register(selector, SelectionKey.OP_READ);
                         
                         ServerPacket p = new ServerPacket(
-                        			ServerPacket.PacketType.Acknowledge,
-                        			"Welcome!",
-                        			new byte[]{1,2,3,4,5}
-                        		);
-                        
-                        sendPacket(p, cchannel);                        	                   
-                    }
+                    			ServerPacket.PacketType.Acknowledge,
+                    			"Welcome!",
+                    			new byte[]{1,2,3,4,5}
+                    		);
+                    
+                        sendPacket(p, cchannel); 
+                    } 
                     else 
                     {
                     	SelectableChannel sc = key.channel();
-
-                	
+                    	
                         SocketChannel cchannel = (SocketChannel)sc;
-                        /*if (key.isReadable())
+                        if (key.isReadable())
                         {	                        
                             // Open input and output streams
                             inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
@@ -145,62 +150,92 @@ public class SelectServer
                             	
 	                            if (bytesSent != outputStr.length())
 	                            {
-	                                System.out.println("write() error, or connection closed");
+	                                System.out.println("read() error, or connection closed");
 	                                key.cancel();  // deregister the socket
 	                                continue;
 	                            }
-                            }
-                            else if (strSplit[0].equals("get"))
-                            {
-	                            String filename = strSplit.length > 1 ? strSplit[1] : "<none>";		// check if a filename was passed	
-	                            filename = filename.replaceAll("\\s+", "");			// trim whitespace
-	                            System.out.print("Open file: " + filename + "\n");
+	                             
+	                            inBuffer.flip();      // make buffer available  
+	                            decoder.decode(inBuffer, cBuffer, false);
+	                            cBuffer.flip();
+	                            line = cBuffer.toString();
+	                            System.out.print("TCP Client: " + line);
 
-                            	ByteBuffer bufferSize = ByteBuffer.allocate(8);
-	                            byte[] data = getFile(filename);
-	                            
-	                            if (data == null)		// error while reading file 
-	                            {
-	                                System.out.println(filename + " not found.");
-
-		                            bufferSize.putLong(-1);			// let client know the file read failed
+                            	strSplit = line.split(" ");	// split up commands
+                            	strSplit[0] = strSplit[0].replaceAll("\\s+", "");	// trim whitespace
+                            	
+	                            if (line.equals("list\n"))
+	                            {   
+	                            	outputStr = getFileList(".");
+	                            	strLen = outputStr.length();
+	                            	
+	                            	bufferSize = ByteBuffer.allocate(4);		// send the size of message
+		                            bufferSize.putInt(strLen);
 		                            bufferSize.rewind();
-		                            cchannel.write(bufferSize);		// send fail filesize
-	                            
-	                                // send error message to client		                                
-	                                sendMessage("Error in opening file " + filename + "\n", cchannel, encoder);
+		                            cchannel.write(bufferSize);
+
+	                            	bytesSent = sendMessage(outputStr, cchannel, encoder);	// send message to client
+	                            	
+		                            if (bytesSent != outputStr.length())
+		                            {
+		                                System.out.println("write() error, or connection closed");
+		                                key.cancel();  // deregister the socket
+		                                continue;
+		                            }
+	                            }
+	                            else if (strSplit[0].equals("get"))
+	                            {
+		                            String filename = strSplit.length > 1 ? strSplit[1] : "<none>";		// check if a filename was passed	
+		                            filename = filename.replaceAll("\\s+", "");			// trim whitespace
+		                            System.out.print("Open file: " + filename + "\n");
+
+	                            	bufferSize = ByteBuffer.allocate(8);
+		                            byte[] data = getFile(filename);
+		                            
+		                            if (data == null)		// error while reading file 
+		                            {
+		                                System.out.println(filename + " not found.");
+
+			                            bufferSize.putLong(-1);			// let client know the file read failed
+			                            bufferSize.rewind();
+			                            cchannel.write(bufferSize);		// send fail filesize
+		                            
+		                                // send error message to client		                                
+		                                sendMessage("Error in opening file " + filename + "\n", cchannel, encoder);
+		                            }
+		                            else
+		                            {       
+			                            bufferSize.putLong(data.length);	 
+			                            bufferSize.rewind();
+			                            cchannel.write(bufferSize);		// send filesize to client
+		                            
+			                            ByteBuffer outBuf = ByteBuffer.allocate(data.length);
+			                            outBuf.put(data);
+			                            outBuf.flip();
+			                            cchannel.write(outBuf);		// send file data to client
+		                            }
+	                            }
+	                            else if (line.equals("terminate\n"))
+	                            {
+	                                terminated = true;
 	                            }
 	                            else
-	                            {       
-		                            bufferSize.putLong(data.length);	 
-		                            bufferSize.rewind();
-		                            cchannel.write(bufferSize);		// send filesize to client
-	                            
-		                            ByteBuffer outBuf = ByteBuffer.allocate(data.length);
-		                            outBuf.put(data);
-		                            outBuf.flip();
-		                            cchannel.write(outBuf);		// send file data to client
-	                            }
-                            }
-                            else if (line.equals("terminate\n"))
-                            {
-                                terminated = true;
-                            }
-                            else
-                            {
-                            	line = line.replaceAll("\\s+", "");						// trim whitespace
-                            	String outStr = "Unknown command: " + line + "\n";		// build error string
-                            	int outLen = outStr.length();
-                            	bytesSent = sendMessage(outStr, cchannel, encoder);		// send error to client
-	                            
-	                            if (bytesSent != outLen)
 	                            {
-	                                System.out.println("write() error, or connection closed");
-	                                key.cancel();  // deregister the socket
-	                                continue;
+	                            	line = line.replaceAll("\\s+", "");						// trim whitespace
+	                            	String outStr = "Unknown command: " + line + "\n";		// build error string
+	                            	int outLen = outStr.length();
+	                            	bytesSent = sendMessage(outStr, cchannel, encoder);		// send error to client
+		                            
+		                            if (bytesSent != outLen)
+		                            {
+		                                System.out.println("write() error, or connection closed");
+		                                key.cancel();  // deregister the socket
+		                                continue;
+		                            }
 	                            }
+
                             }                    	
-                    	}*/
+                    	}
                     }
                 } // end of while (readyItor.hasNext()) 
             } // end of while (!terminated)
@@ -291,7 +326,50 @@ public class SelectServer
         catch (IOException e) {
             System.out.println(e);
     	}
-    }    
+    }
+    
+    // do_UDP - processes an incoming UDP packet
+    static String do_UDP(DatagramChannel dc, 
+			    		SelectionKey key, 
+			    		ByteBuffer inBuffer, 
+			    		CharBuffer cBuffer, 
+			    		CharsetDecoder decoder) throws IOException
+    {
+        if (key.isReadable())
+        {
+            // Open input and output streams
+            inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
+            cBuffer = CharBuffer.allocate(BUFFERSIZE);
+         
+            // Read from socket
+            SocketAddress addr = dc.receive(inBuffer);
+            if (addr == null)
+            {
+                System.out.println("read() error, or connection closed");
+                key.cancel();  // deregister the socket
+                return null;
+            }
+             
+            inBuffer.flip();      // make buffer available  
+            decoder.decode(inBuffer, cBuffer, false);
+            cBuffer.flip();
+            String line = cBuffer.toString();
+            int bytesRecv = line.length();
+            System.out.print("UDP Client: " + line + "\n");		// print udp message
+   	                          
+            // Echo the message back
+            inBuffer.flip();
+            int bytesSent = dc.send(inBuffer, addr); 
+            if (bytesSent != bytesRecv)
+            {
+                System.out.println("write() error, or connection closed");
+                key.cancel();  // deregister the socket
+                return null;
+            }
+            return line;
+         }
+        return null;
+    }
      
     // sendMessage - sends string to client through TCP socketchannel
     static int sendMessage(String msg, 

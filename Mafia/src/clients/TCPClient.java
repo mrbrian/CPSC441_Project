@@ -14,6 +14,8 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel; 
+import networks.ServerPacket; 
+
 
 class TCPClient { 
 
@@ -78,7 +80,7 @@ class TCPClient {
 		        // wait for data!
 		        while (isDataAvailable == 0)   
 		        {		        	
-		        	isDataAvailable = in.available();// inData.available(); 
+		        	isDataAvailable = inData.available();// inData.available(); 
 		        }
 
 		        System.out.print(isDataAvailable);
@@ -89,7 +91,7 @@ class TCPClient {
 		        	
 		        	ServerPacket p = ServerPacket.read(inData);
 		        	processPacket(p); // process data	       
-		        	isDataAvailable = in.available();		        	
+		        	isDataAvailable = inData.available();		        	
 		        }
 		        
 		        /*
