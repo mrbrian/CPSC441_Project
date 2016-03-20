@@ -1,4 +1,4 @@
-package networks;
+package clients;
 
 /*
  * A simple TCP client that sends messages to a server and display the message
