@@ -11,7 +11,9 @@ package networks;
 import java.awt.image.DataBuffer;
 import java.io.*; 
 import java.net.*;
-import java.nio.CharBuffer; 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.SocketChannel; 
 
 class TCPClient { 
 
@@ -30,6 +32,15 @@ class TCPClient {
 	public static void parseCommand()
 	{
 		
+	}
+
+    static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
+    {
+    	System.out.print(p.getSize());
+    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
+    	p.write(inBuffer);
+    	inBuffer.rewind();
+    	ch.write(inBuffer);  		
 	}
 	
     public static void main(String args[]) throws Exception 
@@ -62,7 +73,7 @@ class TCPClient {
 	        // Get user input and send to the server
 	        // Display the echo meesage from the server
 	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-        
+      
 	        while (!line.equals("logout"))
 	        {   
 		        // wait for data!
