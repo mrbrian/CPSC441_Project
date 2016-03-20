@@ -34,13 +34,13 @@ class TCPClient {
 		
 	}
 
-    static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
+    static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException
     {
-    	System.out.print(p.getSize());
-    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
-    	p.write(inBuffer);
-    	inBuffer.rewind();
-    	ch.write(inBuffer);  		
+    	int size = p.getPacketSize();
+    	ByteBuffer buf = ByteBuffer.allocateDirect(size);
+    	p.write(buf);
+    	buf.rewind();
+    	outBuffer.write(buf.array());  		
 	}
 	
     public static void main(String args[]) throws Exception 
@@ -60,8 +60,7 @@ class TCPClient {
 	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
 	        //BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
 	        DataInputStream inData = new DataInputStream(clientSocket.getInputStream());
-	        InputStream in = clientSocket.getInputStream();
-	
+	 
 	        // Initialize user input stream
 	        String line = ""; 
 	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
@@ -90,9 +89,9 @@ class TCPClient {
 		        	
 		        	ServerPacket p = ServerPacket.read(inData);
 		        	processPacket(p); // process data	       
-		        	//inData.skipBytes(5);
 		        	isDataAvailable = in.available();		        	
 		        }
+		        
 		        /*
 	            String[] split = line.split(" ");
 	            split[0] = split[0].replaceAll("\\s+", "");		// trim whitespace from command
