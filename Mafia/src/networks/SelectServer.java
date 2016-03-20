@@ -13,12 +13,13 @@ import java.nio.channels.*;
 import java.nio.charset.*;
 import java.util.*;
 
+import clients.ClientPacket;
+
 public class SelectServer {
     public static int BUFFERSIZE = 256;
     
     static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
     {
-    	System.out.print(p.getSize());
     	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
     	p.write(inBuffer);
     	inBuffer.rewind();
@@ -120,6 +121,13 @@ public class SelectServer {
 
                             // Read from socket
                             bytesRecv = cchannel.read(inBuffer);
+                            
+                            inBuffer.flip();
+                            
+                            System.out.println(bytesRecv);
+                            System.out.println(inBuffer.getInt());
+                            
+                            
                             if (bytesRecv <= 0)
                             {
                                 System.out.println("read() error, or connection closed");
