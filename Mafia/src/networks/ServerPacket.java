@@ -116,6 +116,7 @@ public class ServerPacket
 		
 		return super.equals(o);
 	}
+
 	
 	public static ServerPacket buildServerMessagePacket(String msg) {
 		
@@ -216,5 +217,26 @@ public class ServerPacket
 		
 		ServerPacket packet = new ServerPacket(PacketType.BanUser, msg, data);
 		return packet;
+	}	
+
+	public int getSize()
+	{
+		/*			
+			public PacketType pType;
+			public int msgLength;
+			public int dataSize;
+			public String msg;
+			public byte[] data;				
+		*/
+		
+		int size = 0;
+
+		size += 4;  // pType
+		size += 4;  // msgLength
+		size += 4;  // dataSize
+		size += msg.length();  // msg
+		size += data.length;   // data
+		
+		return size;
 	}
 }

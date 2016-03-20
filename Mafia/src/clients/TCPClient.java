@@ -29,8 +29,81 @@ class TCPClient {
 	}
 
 	
-	public static void parseCommand()
+	public static void parseCommand(String input)
 	{
+		String delims = "[ ]+";
+		String[] tokens = input.split(delims);
+		ClientPacket packet;
+		
+		
+		if (tokens.length > 0 && tokens[0].charAt(0) == '/') { //is a command
+			String command = tokens[0];
+			
+			switch (command) {
+				case "/createaccount":
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.createAccountPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with createaccount: must provide a username and password");
+					}
+					break;
+				case "/login":	
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with login: must provide a username and password");
+					}
+					break;
+				case "/logout":
+					packet = ClientPacket.logout();
+					break;
+				case "/setalias":
+					if (tokens[1] != null) {
+						packet = ClientPacket.setAlias(tokens[1]);
+					} else {
+						System.out.println("error with setalias: must provide an alias");
+					}
+					break;
+				case "/join":
+					if (tokens[1] != null) {
+						packet = ClientPacket.join(tokens[1]);
+					} else {
+						System.out.println("error with join: must provide a room id");
+					}
+					break;
+				case "/invite":
+					if (tokens[1] != null) {
+						packet = ClientPacket.invite(tokens[1]);
+					} else {
+						System.out.println("error with invite: must provide a username");
+					}
+					break;
+				case "/listusers":
+					packet = ClientPacket.listUser();
+					break;
+				case "/listrooms":
+					packet = ClientPacket.listRoom();
+					break;
+				case "/vote":
+					if (tokens[1] != null) {
+						packet = ClientPacket.vote(tokens[1]);
+					} else {
+						System.out.println("error with vote: must provide a username");
+					}
+					break;
+				case "/getgamestatus":
+					packet = ClientPacket.getGameStatus();
+					break;
+				default:
+					System.out.println("Not a vaild command");
+					break;
+			}
+			
+		} else { //not a command, just text so use chat packet
+			packet = ClientPacket.chat(input);
+		}
+		
+		
 		
 	}
 	
@@ -49,8 +122,9 @@ class TCPClient {
             
 	        // Initialize input and an output stream for the connection(s)
 	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
-	        BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
+	        //BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
 	        DataInputStream inData = new DataInputStream(clientSocket.getInputStream());
+	        InputStream in = clientSocket.getInputStream();
 	
 	        // Initialize user input stream
 	        String line = ""; 
@@ -63,16 +137,16 @@ class TCPClient {
 	        // Get user input and send to the server
 	        // Display the echo meesage from the server
 	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-	        //line = inFromUser.readLine(); 
         
 	        while (!line.equals("logout"))
 	        {   
 		        // wait for data!
-		        while (isDataAvailable == 0)   // its blocking.
-		        {
-		        	isDataAvailable = inData.available(); 
+		        while (isDataAvailable == 0)   
+		        {		        	
+		        	isDataAvailable = in.available();// inData.available(); 
 		        }
-		        
+
+		        System.out.print(isDataAvailable);
 		        // read the data!
 		        while (isDataAvailable > 0)
 		        {
@@ -80,8 +154,8 @@ class TCPClient {
 		        	
 		        	ServerPacket p = ServerPacket.read(inData);
 		        	processPacket(p); // process data	       
-
-		        	isDataAvailable = inData.available();    
+		        	//inData.skipBytes(5);
+		        	isDataAvailable = in.available();		        	
 		        }
 		        /*
 	            String[] split = line.split(" ");

@@ -19,7 +19,8 @@ public class SelectServer
     
     static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
     {
-    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
+    	System.out.print(p.getSize());
+    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
     	p.write(inBuffer);
     	inBuffer.rewind();
     	ch.write(inBuffer);    	
@@ -104,7 +105,7 @@ public class SelectServer
 
                 	
                         SocketChannel cchannel = (SocketChannel)sc;
-                        if (key.isReadable())
+                        /*if (key.isReadable())
                         {	                        
                             // Open input and output streams
                             inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
@@ -199,7 +200,7 @@ public class SelectServer
 	                                continue;
 	                            }
                             }                    	
-                    	}
+                    	}*/
                     }
                 } // end of while (readyItor.hasNext()) 
             } // end of while (!terminated)
