@@ -40,7 +40,27 @@ public class ClientPacket {
 		buffer.put(data);
 	}
 	
-	public static ClientPacket loginRegPacket(String username, String password){
+	//create account packet
+	public static ClientPacket createAccountPacket(String username, String password){
+		int totalSize = username.length() + password.length() + 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putShort((short)username.length());
+		buffer.put(username.getBytes());
+		
+		buffer.putShort((short)password.length());
+		buffer.put(password.getBytes());
+		
+		buffer.flip();
+		
+		byte[] credentials = new byte[totalSize];
+		buffer.get(credentials);
+		
+		return new ClientPacket(PacketType.CreateAccount, credentials);
+	}
+	
+	//login to account packet
+	public static ClientPacket loginPacket(String username, String password){
 		int totalSize = username.length() + password.length() + 4;
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 		

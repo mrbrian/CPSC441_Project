@@ -16,7 +16,6 @@ import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel; 
 import networks.ServerPacket; 
 
-
 class TCPClient { 
 
 	public static void processPacket(ServerPacket p)
@@ -30,12 +29,86 @@ class TCPClient {
 				break;
 		}	
 	}
+
 	
-	public static void parseCommand()
+	public static void parseCommand(String input)
 	{
+		String delims = "[ ]+";
+		String[] tokens = input.split(delims);
+		ClientPacket packet;
+		
+		
+		if (tokens.length > 0 && tokens[0].charAt(0) == '/') { //is a command
+			String command = tokens[0];
+			
+			switch (command) {
+				case "/createaccount":
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.createAccountPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with createaccount: must provide a username and password");
+					}
+					break;
+				case "/login":	
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with login: must provide a username and password");
+					}
+					break;
+				case "/logout":
+					packet = ClientPacket.logout();
+					break;
+				case "/setalias":
+					if (tokens[1] != null) {
+						packet = ClientPacket.setAlias(tokens[1]);
+					} else {
+						System.out.println("error with setalias: must provide an alias");
+					}
+					break;
+				case "/join":
+					if (tokens[1] != null) {
+						packet = ClientPacket.join(tokens[1]);
+					} else {
+						System.out.println("error with join: must provide a room id");
+					}
+					break;
+				case "/invite":
+					if (tokens[1] != null) {
+						packet = ClientPacket.invite(tokens[1]);
+					} else {
+						System.out.println("error with invite: must provide a username");
+					}
+					break;
+				case "/listusers":
+					packet = ClientPacket.listUser();
+					break;
+				case "/listrooms":
+					packet = ClientPacket.listRoom();
+					break;
+				case "/vote":
+					if (tokens[1] != null) {
+						packet = ClientPacket.vote(tokens[1]);
+					} else {
+						System.out.println("error with vote: must provide a username");
+					}
+					break;
+				case "/getgamestatus":
+					packet = ClientPacket.getGameStatus();
+					break;
+				default:
+					System.out.println("Not a vaild command");
+					break;
+			}
+			
+		} else { //not a command, just text so use chat packet
+			packet = ClientPacket.chat(input);
+		}
+		
+		
 		
 	}
-
+	
     static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException
     {
     	int size = p.getPacketSize();

@@ -22,7 +22,6 @@ public class LobbyLogic{
 	
 	public boolean connectUser(String user, String password){
 		return false;
-		
 	}
 	
 	public void login(String username, String password){
