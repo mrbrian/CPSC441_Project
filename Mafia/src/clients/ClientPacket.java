@@ -155,6 +155,6 @@ public class ClientPacket {
 	 * 4 = 2 bytes (for the enum type) + 2 bytes (for the data size)
 	 * */
 	public int getPacketSize(){
-		return 4 + data.length;
+		return 8 + data.length;
 	}
 }

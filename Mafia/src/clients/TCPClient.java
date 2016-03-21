@@ -31,7 +31,7 @@ class TCPClient {
 	}
 
 	
-	public static void parseCommand(String input)
+	public static void parseCommand(String input, DataOutputStream outBuffer) throws IOException
 	{
 		String delims = "[ ]+";
 		String[] tokens = input.split(delims);
@@ -103,6 +103,7 @@ class TCPClient {
 			
 		} else { //not a command, just text so use chat packet
 			packet = ClientPacket.chat(input);
+            sendPacket(packet, outBuffer);
 		}
 		
 		
@@ -115,7 +116,9 @@ class TCPClient {
     	ByteBuffer buf = ByteBuffer.allocateDirect(size);
     	p.write(buf);
     	buf.rewind();
-    	outBuffer.write(buf.array());  		
+    	byte[] bytes = new byte[size];
+    	buf.get(bytes);
+    	outBuffer.write(bytes);  		
 	}
 	
     public static void main(String args[]) throws Exception 
@@ -151,10 +154,10 @@ class TCPClient {
 	        while (!line.equals("logout"))
 	        {   
 		        // wait for data!
-		        while (isDataAvailable == 0)   
+		        /*while (isDataAvailable == 0)   
 		        {		        	
 		        	isDataAvailable = inData.available();// inData.available(); 
-		        }
+		        }*/
 
 		        System.out.print(isDataAvailable);
 		        // read the data!
@@ -169,8 +172,7 @@ class TCPClient {
 		        
 	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
 	            line = inFromUser.readLine(); 
-	            ClientPacket p = ClientPacket.chat(line);
-	            sendPacket(p, outBuffer);
+	            parseCommand(line, outBuffer);
 	        }
 	        
 	        // Close the socket
