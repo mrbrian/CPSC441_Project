@@ -94,35 +94,10 @@ class TCPClient {
 		        	isDataAvailable = inData.available();		        	
 		        }
 		        
-		        /*
-	            String[] split = line.split(" ");
-	            split[0] = split[0].replaceAll("\\s+", "");		// trim whitespace from command
-	            
-	            // Send to the server
-	            outBuffer.writeBytes(line + "\n"); 
-	
-				// List command detection
-	        	if (split[0].equals("list"))
-	        	{
-	        		receiveFileList(inData); //receive file list
-	        	}
-				//Get command detection
-	        	else if (split[0].equals("get"))
-	        	{
-	        		String filename = split.length > 1 ? split[1] : "noname";	//parse filename from user command.. use "noname" if none is given
-	        		int port = clientSocket.getLocalPort(); //get client port
-	        		String destfile = filename + "-" + port; //concatenate new filename
-	        		receiveFile(inData, inBuffer, destfile); //getFile    			
-	        	}
-	        	else
-	        	{
-		            // Getting response from the server
-		            line = inBuffer.readLine();
-		            System.out.println("Server: " + line);
-	        	}   
-	        	*/
 	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
 	            line = inFromUser.readLine(); 
+	            ClientPacket p = ClientPacket.chat(line);
+	            sendPacket(p, outBuffer);
 	        }
 	        
 	        // Close the socket
