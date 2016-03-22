@@ -72,9 +72,14 @@ public class SelectServer
 	    		username = new String(p.data, 2, usernameLength);
     			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));
     			
-    			WriteToFile saveInfo = new WriteToFile();
-    			saveInfo.saveUserData(username, password);
-	    		
+    			FileIO saveInfo = new FileIO();
+    			
+    			if(saveInfo.doesUsrExist(username)){
+    				saveInfo.saveUserData(username, password);
+    			}else{
+    				System.out.println("Username already exists !");
+    			}
+    			
 	    		break;
 	    	case SetAlias:
 	    		String pseudo = new String(p.data, 0, p.dataSize);
