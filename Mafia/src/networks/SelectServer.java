@@ -13,56 +13,91 @@ import java.nio.channels.*;
 import java.nio.charset.*;
 import java.util.*;
 
-public class SelectServer {
-    public static int BUFFERSIZE = 256;
+import clients.ClientPacket;
+import clients.Player;
+import game_space.ReadyRoom;
+
+public class SelectServer 
+{
+	public static int BUFFERSIZE = 256;
+	
+	ArrayList<Player> players;
+	ArrayList<ReadyRoom> rooms;
+	
+	ServerSocketChannel tcp_channel;
+    ByteBuffer inBuffer;
+    CharBuffer cBuffer;
+    Selector selector;
     
-    static void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
+	SelectServer(int port) throws IOException
+	{
+		players = new ArrayList<Player>();
+		
+        // Initialize buffers and coders for channel receive and send
+        Charset charset = Charset.forName( "us-ascii" );  
+        CharsetDecoder decoder = charset.newDecoder();  
+        CharsetEncoder encoder = charset.newEncoder();
+        int bytesSent, bytesRecv;     // number of bytes sent or received
+        
+        // Initialize the selector
+        selector = Selector.open();
+
+        // Create a server channel and make it non-blocking
+        tcp_channel = ServerSocketChannel.open();
+        tcp_channel.configureBlocking(false);
+       
+        // Get the port number and bind the socket
+        InetSocketAddress isa = new InetSocketAddress(port);
+        tcp_channel.socket().bind(isa);
+
+        // Register that the server selector is interested in connection requests
+        tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+	}
+	
+    void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
     {
-    	System.out.print(p.getSize());
     	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
     	p.write(inBuffer);
     	inBuffer.rewind();
     	ch.write(inBuffer);    	
     }    
     
-    public static void main(String args[]) throws Exception 
+    Player getPlayer(SocketAddress socketAddress)
     {
-        if (args.length != 1)
-        {
-            System.out.println("Usage: UDPServer <Listening Port>");
-            System.exit(1);
-        }
-
-        // Initialize buffers and coders for channel receive and send
-        String line = "";
-        Charset charset = Charset.forName( "us-ascii" );  
-        CharsetDecoder decoder = charset.newDecoder();  
-        CharsetEncoder encoder = charset.newEncoder();
-        ByteBuffer inBuffer = null;
-        CharBuffer cBuffer = null;
-        int bytesSent, bytesRecv;     // number of bytes sent or received
-        
-        // Initialize the selector
-        Selector selector = Selector.open();
-
-        // Create a server channel and make it non-blocking
-        ServerSocketChannel tcp_channel = ServerSocketChannel.open();
-        tcp_channel.configureBlocking(false);
-       
-        // Get the port number and bind the socket
-        InetSocketAddress isa = new InetSocketAddress(Integer.parseInt(args[0]));
-        tcp_channel.socket().bind(isa);
-
-        // Register that the server selector is interested in connection requests
-        tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
-
-        // Declare a UDP server socket and a datagram packet
-        DatagramChannel udp_channel = null;        
-        udp_channel = DatagramChannel.open();
-        udp_channel.socket().bind(isa);
-        udp_channel.configureBlocking(false);
-        udp_channel.register(selector, SelectionKey.OP_READ);
-        
+    	String findIp = socketAddress.toString();
+    	for (Player p :players) {
+			if (p.getIPAddress().equals(findIp))
+				return p;
+		}
+		return null;    	
+    }
+    
+    void processPacket(ClientPacket p, Player player)
+    {
+    	if (player == null)
+    		return;
+    	
+    	switch (p.type)
+    	{
+	    	case CreateAccount:
+	    		break;
+	    	case Login:
+	    		break;
+	    	case Join:
+	    		// join or if not exist, create room
+	    		break;
+	    	case Chat:
+	    		String msg = new String(p.data, 0, p.dataSize);
+	    		System.out.println(String.format("Chat [%s]: %s", player.getIPAddress(), msg));
+	    		break;
+    		default:
+    			System.out.println(String.format("%s [%s]", p.type.toString(), player.getIPAddress()));
+    			break;
+    	}
+    }
+    
+    public void run() throws Exception 
+    {
         // Wait for something happen among all registered sockets
         try {
             boolean terminated = false;
@@ -97,6 +132,10 @@ public class SelectServer {
                         // Register the new connection for read operation
                         cchannel.register(selector, SelectionKey.OP_READ);
                         
+                        Player plyr = new Player();
+                        plyr.setIPAddress(cchannel.getRemoteAddress().toString());
+                        players.add(plyr);
+                        
                         ServerPacket p = new ServerPacket(
                     			ServerPacket.PacketType.Acknowledge,
                     			"Welcome!",
@@ -115,11 +154,11 @@ public class SelectServer {
                             // Open input and output streams
                             inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
                             cBuffer = CharBuffer.allocate(BUFFERSIZE);
-                             
+                          
                             Thread.sleep(100);		
 
                             // Read from socket
-                            bytesRecv = cchannel.read(inBuffer);
+                            int bytesRecv = cchannel.read(inBuffer);
                             if (bytesRecv <= 0)
                             {
                                 System.out.println("read() error, or connection closed");
@@ -128,113 +167,13 @@ public class SelectServer {
                             }
                              
                             inBuffer.flip();      // make buffer available  
-                            decoder.decode(inBuffer, cBuffer, false);
-                            cBuffer.flip();
-                            line = cBuffer.toString();
-                            System.out.print("TCP Client: " + line);
-
-                        	String[] strSplit = line.split(" ");	// split up commands
-                        	strSplit[0] = strSplit[0].replaceAll("\\s+", "");	// trim whitespace
-                        	
-                            if (line.equals("list\n"))
-                            {   
-                            	String outputStr = getFileList(".");
-                            	int strLen = outputStr.length();
-                            	
-                            	ByteBuffer bufferSize = ByteBuffer.allocate(4);		// send the size of message
-	                            bufferSize.putInt(strLen);
-	                            bufferSize.rewind();
-	                            cchannel.write(bufferSize);
-
-                            	bytesSent = sendMessage(outputStr, cchannel, encoder);	// send message to client
-                            	
-	                            if (bytesSent != outputStr.length())
-	                            {
-	                                System.out.println("read() error, or connection closed");
-	                                key.cancel();  // deregister the socket
-	                                continue;
-	                            }
-	                             
-	                            inBuffer.flip();      // make buffer available  
-	                            decoder.decode(inBuffer, cBuffer, false);
-	                            cBuffer.flip();
-	                            line = cBuffer.toString();
-	                            System.out.print("TCP Client: " + line);
-
-                            	strSplit = line.split(" ");	// split up commands
-                            	strSplit[0] = strSplit[0].replaceAll("\\s+", "");	// trim whitespace
-                            	
-	                            if (line.equals("list\n"))
-	                            {   
-	                            	outputStr = getFileList(".");
-	                            	strLen = outputStr.length();
-	                            	
-	                            	bufferSize = ByteBuffer.allocate(4);		// send the size of message
-		                            bufferSize.putInt(strLen);
-		                            bufferSize.rewind();
-		                            cchannel.write(bufferSize);
-
-	                            	bytesSent = sendMessage(outputStr, cchannel, encoder);	// send message to client
-	                            	
-		                            if (bytesSent != outputStr.length())
-		                            {
-		                                System.out.println("write() error, or connection closed");
-		                                key.cancel();  // deregister the socket
-		                                continue;
-		                            }
-	                            }
-	                            else if (strSplit[0].equals("get"))
-	                            {
-		                            String filename = strSplit.length > 1 ? strSplit[1] : "<none>";		// check if a filename was passed	
-		                            filename = filename.replaceAll("\\s+", "");			// trim whitespace
-		                            System.out.print("Open file: " + filename + "\n");
-
-	                            	bufferSize = ByteBuffer.allocate(8);
-		                            byte[] data = getFile(filename);
-		                            
-		                            if (data == null)		// error while reading file 
-		                            {
-		                                System.out.println(filename + " not found.");
-
-			                            bufferSize.putLong(-1);			// let client know the file read failed
-			                            bufferSize.rewind();
-			                            cchannel.write(bufferSize);		// send fail filesize
-		                            
-		                                // send error message to client		                                
-		                                sendMessage("Error in opening file " + filename + "\n", cchannel, encoder);
-		                            }
-		                            else
-		                            {       
-			                            bufferSize.putLong(data.length);	 
-			                            bufferSize.rewind();
-			                            cchannel.write(bufferSize);		// send filesize to client
-		                            
-			                            ByteBuffer outBuf = ByteBuffer.allocate(data.length);
-			                            outBuf.put(data);
-			                            outBuf.flip();
-			                            cchannel.write(outBuf);		// send file data to client
-		                            }
-	                            }
-	                            else if (line.equals("terminate\n"))
-	                            {
-	                                terminated = true;
-	                            }
-	                            else
-	                            {
-	                            	line = line.replaceAll("\\s+", "");						// trim whitespace
-	                            	String outStr = "Unknown command: " + line + "\n";		// build error string
-	                            	int outLen = outStr.length();
-	                            	bytesSent = sendMessage(outStr, cchannel, encoder);		// send error to client
-		                            
-		                            if (bytesSent != outLen)
-		                            {
-		                                System.out.println("write() error, or connection closed");
-		                                key.cancel();  // deregister the socket
-		                                continue;
-		                            }
-	                            }
-
-                            }                    	
+                            
+                            while (inBuffer.hasRemaining())
+                            {
+	                            ClientPacket cp = ClientPacket.read(inBuffer);
+	                            Player sender = getPlayer(cchannel.getRemoteAddress()); 
+	                            processPacket(cp, sender);
+                            }
                     	}
                     }
                 } // end of while (readyItor.hasNext()) 
@@ -262,51 +201,6 @@ public class SelectServer {
         }
     }
 
-    // getFile - returns byte array containing the contents of some file 
-    static byte[] getFile(String filename)
-    {
-    	byte[] result = null;
-	    
-    	try
-	    {	
-  		    File f = new File(filename);
-  		    FileInputStream input = new FileInputStream(f);
-
-	    	int size = (int)f.length();
-		    result = new byte[size];
-
-		    input.read(result);		// read bytes from file
-		    input.close();
-	    }
-	    catch(IOException e) {
-            System.out.println("open() failed");
-            result = null;
-        }
-	    return result;
-    }
-    
-    // getFileList - scans a path and returns string of contents
-    static String getFileList(String dir)
-    {
-	    String result = "";
-		try
-		{
-		    String current = new File(dir).getCanonicalPath();
-		    File directory = new File(current);
-		    File[] files = directory.listFiles();
-			
-		    for (int i = 0; i < files.length; i++) 
-			{
-				if (files[i].isFile()) 
-					result += files[i].getName() + '\n';	// build file list 
-		    }
-		}
-        catch (IOException e) {
-            System.out.println(e);
-        }
-		return result;
-    }    
-    
     // closeChannel - closes the given SelectableChannel (either UDP or TCP)
     static void closeChannel(SelectableChannel channel)
     {
@@ -327,65 +221,16 @@ public class SelectServer {
             System.out.println(e);
     	}
     }
-    
-    // do_UDP - processes an incoming UDP packet
-    static String do_UDP(DatagramChannel dc, 
-			    		SelectionKey key, 
-			    		ByteBuffer inBuffer, 
-			    		CharBuffer cBuffer, 
-			    		CharsetDecoder decoder) throws IOException
-    {
-        if (key.isReadable())
+
+    public static void main(String args[]) throws Exception 
+	{
+		 if (args.length != 1)
         {
-            // Open input and output streams
-            inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
-            cBuffer = CharBuffer.allocate(BUFFERSIZE);
-         
-            // Read from socket
-            SocketAddress addr = dc.receive(inBuffer);
-            if (addr == null)
-            {
-                System.out.println("read() error, or connection closed");
-                key.cancel();  // deregister the socket
-                return null;
-            }
-             
-            inBuffer.flip();      // make buffer available  
-            decoder.decode(inBuffer, cBuffer, false);
-            cBuffer.flip();
-            String line = cBuffer.toString();
-            int bytesRecv = line.length();
-            System.out.print("UDP Client: " + line + "\n");		// print udp message
-   	                          
-            // Echo the message back
-            inBuffer.flip();
-            int bytesSent = dc.send(inBuffer, addr); 
-            if (bytesSent != bytesRecv)
-            {
-                System.out.println("write() error, or connection closed");
-                key.cancel();  // deregister the socket
-                return null;
-            }
-            return line;
-         }
-        return null;
-    }
-     
-    // sendMessage - sends string to client through TCP socketchannel
-    static int sendMessage(String msg, 
-				    		SocketChannel cchannel, 
-				    		CharsetEncoder encoder) throws IOException
-    {
-    	int outLen = msg.length();
-    	CharBuffer newcb = CharBuffer.allocate(outLen);		// allocate required space
-    	ByteBuffer outBuf = ByteBuffer.allocate(outLen);
-    	
-    	newcb.put(msg);
-    	newcb.rewind();
-    	encoder.encode(newcb, outBuf, false);
-    	outBuf.flip();
-        int bytesSent = cchannel.write(outBuf);		// send to client
-        
-        return bytesSent;
-    }
+            System.out.println("Usage: SelectServer <Listening Port>");
+            System.exit(1);
+        }
+		int port = Integer.parseInt(args[0]);
+		SelectServer server = new SelectServer(port);
+		server.run();
+	}
 }

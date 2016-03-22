@@ -2,7 +2,7 @@ package game_space;
 
 import java.util.ArrayList;
 
-import clients.Players;
+import clients.Player;
 
 public class ReadyRoom{
 	
@@ -52,13 +52,13 @@ public class ReadyRoom{
 	//done in the server?
 	public GameSpace beginGame(){
 		//create player objects
-		ArrayList<Players> players = new ArrayList<Players>();
+		ArrayList<Player> players = new ArrayList<Player>();
 		
-		Players p;
+		Player p;
 		
 		//create players for game
 		for (int i = 0; i < playerList.size(); i++) {
-			p = new Players();
+			p = new Player();
 			p.setIPAddress(playerList.get(i)[0]);
 			players.add(p);
 		}

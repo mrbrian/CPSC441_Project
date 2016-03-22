@@ -4,26 +4,26 @@ import java.util.Random;
 import java.util.ArrayList;
 import java.util.Random;
 
-import clients.Players;
+import clients.Player;
 
 public class GameSpace{
 	private Random randGen;
-	private Players lynchVictim = null;
-	private Players murderVictim = null;
+	private Player lynchVictim = null;
+	private Player murderVictim = null;
 	private boolean lynchOngoing;
 	private boolean murderOngoing;
 	private int lynchCount = 0;
 	private int murderCount = 0;
 	
-	private ArrayList<Players> players;
-	private ArrayList<Players> innocent;
-	private ArrayList<Players> mafioso;
-	private ArrayList<Players> graveyard;
+	private ArrayList<Player> players;
+	private ArrayList<Player> innocent;
+	private ArrayList<Player> mafioso;
+	private ArrayList<Player> graveyard;
 	private int mafiaFraction = 3;			//fraction = 1/mafiaFraction
 	private enum gameState {DAY, NIGHT};
 	private gameState currentState;
 	
-	public GameSpace(ArrayList<Players> connected) {
+	public GameSpace(ArrayList<Player> connected) {
 		players = connected;
 		currentState = gameState.DAY;
 		assignTeams();
@@ -34,8 +34,8 @@ public class GameSpace{
 		if (numOfMafia == 0)
 			numOfMafia = 1;
 			
-		mafioso = new ArrayList <Players>(numOfMafia);
-		innocent = new ArrayList <Players>(players.size() - numOfMafia);
+		mafioso = new ArrayList <Player>(numOfMafia);
+		innocent = new ArrayList <Player>(players.size() - numOfMafia);
 			
 		for (int i = 0; i < numOfMafia; i++) {
 			int newMafia = randGen.nextInt(players.size());
@@ -48,7 +48,7 @@ public class GameSpace{
 		}
 	}
 	
-	public void lynchVote(Players lyncher, Players victim)
+	public void lynchVote(Player lyncher, Player victim)
 	{
 		if (currentState == gameState.DAY) {
 			if (lynchVictim == null && lynchOngoing == false) {
@@ -79,7 +79,7 @@ public class GameSpace{
 		}
 	}
 
-	public void murderVote(Players murderer, Players victim)
+	public void murderVote(Player murderer, Player victim)
 	{
 		if (currentState == gameState.NIGHT) {
 			if (murderVictim == null && murderOngoing == false) {
@@ -110,7 +110,7 @@ public class GameSpace{
 		}
 	}	
 	
-	public void kill(Players condemned) {
+	public void kill(Player condemned) {
 		players.remove(condemned);
 		if (innocent.contains(condemned) == true){
 			innocent.remove(condemned);
@@ -124,8 +124,8 @@ public class GameSpace{
 	
 	
 	//returns an ArrayList of players with whom the player can speak based on current state, less the player
-	public ArrayList <Players> whoCanChatWith(Players speaker) {	
-		ArrayList<Players> listeners = null;
+	public ArrayList <Player> whoCanChatWith(Player speaker) {	
+		ArrayList<Player> listeners = null;
 		
 		if (speaker.getIsAlive() == false && graveyard.size() > 1)
 			listeners = graveyard;
