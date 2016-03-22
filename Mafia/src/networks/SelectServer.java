@@ -10,19 +10,17 @@ import java.io.*;
 import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
-import java.nio.charset.*;
 import java.util.*;
 
 import clients.ClientPacket;
 import clients.Player;
-import game_space.ReadyRoom;
 
 public class SelectServer 
 {
 	public static int BUFFERSIZE = 256;
 	
-	ArrayList<Player> players;
-	ArrayList<ReadyRoom> rooms;
+	RoomManager room_mgr;
+	PlayerManager plyr_mgr;
 	
 	ServerSocketChannel tcp_channel;
     ByteBuffer inBuffer;
@@ -31,14 +29,8 @@ public class SelectServer
     
 	SelectServer(int port) throws IOException
 	{
-		players = new ArrayList<Player>();
-		
-        // Initialize buffers and coders for channel receive and send
-        Charset charset = Charset.forName( "us-ascii" );  
-        CharsetDecoder decoder = charset.newDecoder();  
-        CharsetEncoder encoder = charset.newEncoder();
-        int bytesSent, bytesRecv;     // number of bytes sent or received
-        
+		plyr_mgr = new PlayerManager();
+		        
         // Initialize the selector
         selector = Selector.open();
 
@@ -62,36 +54,47 @@ public class SelectServer
     	ch.write(inBuffer);    	
     }    
     
-    Player getPlayer(SocketAddress socketAddress)
+    void processPacket(ClientPacket p, SocketAddress socketAddress)
     {
-    	String findIp = socketAddress.toString();
-    	for (Player p :players) {
-			if (p.getIPAddress().equals(findIp))
-				return p;
-		}
-		return null;    	
-    }
-    
-    void processPacket(ClientPacket p, Player player)
-    {
-    	if (player == null)
-    		return;
-    	
+    	Player player = plyr_mgr.findPlayer(socketAddress);
     	switch (p.type)
     	{
 	    	case CreateAccount:
 	    		break;
-	    	case Login:
+	    	case SetAlias:
+	    		String pseudo = new String(p.data, 0, p.dataSize);
+    			player.setPseudonym(pseudo);
+	    		break;
+	    	case Login:	    
+    			ByteBuffer bb = ByteBuffer.allocate(2);
+    			bb.put(p.data[0]);
+    			bb.put(p.data[1]);
+    			short username_length = bb.getShort(0);
+    			
+    			String username = new String(p.data, 2, username_length);
+    			String password = new String(p.data, 2 + username_length + 2, p.dataSize - (2 + username_length + 2));
+    			
+	    		// update player info		
+    			Player new_player = new Player();
+    			new_player.setIPAddress(socketAddress.toString());
+    			new_player.setUsername(username);
+    			
+    			// ... need to bind with ipaddress.
+	    		plyr_mgr.addPlayer(new_player);	// if valid auth details given
 	    		break;
 	    	case Join:
 	    		// join or if not exist, create room
+	    		int rmIdx = p.data[0];	    		
+	    		room_mgr.findRoom(rmIdx);
+	    		player.setRoomIndex(rmIdx);
+	    		System.out.println(String.format("Join [%s]: %d", socketAddress.toString(), rmIdx));	    		
 	    		break;
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);
-	    		System.out.println(String.format("Chat [%s]: %s", player.getIPAddress(), msg));
+	    		System.out.println(String.format("Chat [%s]: %s", socketAddress.toString(), msg));
 	    		break;
     		default:
-    			System.out.println(String.format("%s [%s]", p.type.toString(), player.getIPAddress()));
+    			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
     			break;
     	}
     }
@@ -134,7 +137,6 @@ public class SelectServer
                         
                         Player plyr = new Player();
                         plyr.setIPAddress(cchannel.getRemoteAddress().toString());
-                        players.add(plyr);
                         
                         ServerPacket p = new ServerPacket(
                     			ServerPacket.PacketType.Acknowledge,
@@ -171,8 +173,7 @@ public class SelectServer
                             while (inBuffer.hasRemaining())
                             {
 	                            ClientPacket cp = ClientPacket.read(inBuffer);
-	                            Player sender = getPlayer(cchannel.getRemoteAddress()); 
-	                            processPacket(cp, sender);
+	                            processPacket(cp, cchannel.getRemoteAddress());
                             }
                     	}
                     }

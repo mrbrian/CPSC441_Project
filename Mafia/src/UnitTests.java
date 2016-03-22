@@ -1,6 +1,5 @@
 import static org.junit.Assert.*;
 
-import java.io.DataInputStream;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 

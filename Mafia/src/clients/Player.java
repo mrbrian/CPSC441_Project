@@ -3,7 +3,8 @@ package clients;
 import java.util.ArrayList;
 
 public class Player {
-	
+
+	private String username;
 	private String pseudonym;
 	
 	private String IPAddress;
@@ -11,10 +12,9 @@ public class Player {
 	
 	private PlayerTypes.PlayerType playerType;
 	
+	private int roomIndex;
 	private boolean isAlive;
-	private ArrayList<String> votedWho;
-	
-	
+	private ArrayList<String> votedWho;	
 	
 	/*
 	 *	Client initiates	 
@@ -36,6 +36,7 @@ public class Player {
 	
 	
 	public Player(){
+		roomIndex = -1;
 		isAlive = false;
 		votedWho = new ArrayList<>();
 		playerType = null;
@@ -79,7 +80,19 @@ public class Player {
 		this.isAlive = isAlive;
 	}
 	
+	public void setRoomIndex(int v){
+		this.roomIndex = v;
+	}
+	
+	public int getRoomIndex(int v){
+		return this.roomIndex;
+	}
+
 	public boolean getIsAlive(){
 		return isAlive;
 	}
+
+	public void setUsername(String u) {
+		username = u;
+	}	
 }
