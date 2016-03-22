@@ -40,8 +40,9 @@ public class ClientPacket {
 		buffer.put(data);
 	}
 	
-	// For when a login event is taking place
-	public ClientPacket loginPacket(String username, String password){
+
+	//login to account packet
+	public static ClientPacket loginPacket(String username, String password){
 		int totalSize = username.length() + password.length() + 4;
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 		
@@ -59,7 +60,8 @@ public class ClientPacket {
 		return new ClientPacket(PacketType.Login, credentials);
 	}
 	
-	public ClientPacket createAccountPacket(String username, String password){
+	
+	public static ClientPacket createAccountPacket(String username, String password){
 		int totalSize = username.length() + password.length() + 4;
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 		
@@ -80,39 +82,39 @@ public class ClientPacket {
 	/* Could possibly merge all these "mini methods" into a single method
 	 * and add an extra parameter to indicate what type of event it is
 	 * */
-	public ClientPacket logout(){
+	public static ClientPacket logout(){
 		return new ClientPacket(PacketType.Logout, null);
 	}
 	
-	public ClientPacket setAlias(String alias){
+	public static ClientPacket setAlias(String alias){
 		return new ClientPacket(PacketType.SetAlias, alias.getBytes());
 	}
 	
-	public ClientPacket join(String roomId){
+	public static ClientPacket join(String roomId){
 		return new ClientPacket(PacketType.Join, roomId.getBytes());
 	}
 	
-	public ClientPacket invite(String username){
+	public static ClientPacket invite(String username){
 		return new ClientPacket(PacketType.Invite, username.getBytes());
 	}
 	
-	public ClientPacket listUser(){
+	public static ClientPacket listUser(){
 		return new ClientPacket(PacketType.ListUsers, null);
 	}
 	
-	public ClientPacket listRoom(){
+	public static ClientPacket listRoom(){
 		return new ClientPacket(PacketType.ListRooms, null);
 	}
 	
-	public ClientPacket chat(String msg){
+	public static ClientPacket chat(String msg){
 		return new ClientPacket(PacketType.Chat, msg.getBytes());
 	}
 	
-	public ClientPacket vote(String username){
+	public static ClientPacket vote(String username){
 		return new ClientPacket(PacketType.Vote, username.getBytes());
 	}
 	
-	public ClientPacket getGameStatus(){
+	public static ClientPacket getGameStatus(){
 		return new ClientPacket(PacketType.GetGameStatus, null);
 	}
 
@@ -157,6 +159,6 @@ public class ClientPacket {
 	 * 4 = 2 bytes (for the enum type) + 2 bytes (for the data size)
 	 * */
 	public int getPacketSize(){
-		return 4 + data.length;
+		return 8 + data.length;
 	}
 }

@@ -16,7 +16,6 @@ import java.nio.CharBuffer;
 import java.nio.channels.SocketChannel; 
 import networks.ServerPacket; 
 
-
 class TCPClient { 
 
 	public static void processPacket(ServerPacket p)
@@ -30,19 +29,96 @@ class TCPClient {
 				break;
 		}	
 	}
+
 	
-	public static void parseCommand()
+	public static void parseCommand(String input, DataOutputStream outBuffer) throws IOException
 	{
+		String delims = "[ ]+";
+		String[] tokens = input.split(delims);
+		ClientPacket packet;
+		
+		
+		if (tokens.length > 0 && tokens[0].charAt(0) == '/') { //is a command
+			String command = tokens[0];
+			
+			switch (command) {
+				case "/createaccount":
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.createAccountPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with createaccount: must provide a username and password");
+					}
+					break;
+				case "/login":	
+					if (tokens[1] != null && tokens[2] != null) {
+						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
+					} else {
+						System.out.println("error with login: must provide a username and password");
+					}
+					break;
+				case "/logout":
+					packet = ClientPacket.logout();
+					break;
+				case "/setalias":
+					if (tokens[1] != null) {
+						packet = ClientPacket.setAlias(tokens[1]);
+					} else {
+						System.out.println("error with setalias: must provide an alias");
+					}
+					break;
+				case "/join":
+					if (tokens[1] != null) {
+						packet = ClientPacket.join(tokens[1]);
+					} else {
+						System.out.println("error with join: must provide a room id");
+					}
+					break;
+				case "/invite":
+					if (tokens[1] != null) {
+						packet = ClientPacket.invite(tokens[1]);
+					} else {
+						System.out.println("error with invite: must provide a username");
+					}
+					break;
+				case "/listusers":
+					packet = ClientPacket.listUser();
+					break;
+				case "/listrooms":
+					packet = ClientPacket.listRoom();
+					break;
+				case "/vote":
+					if (tokens[1] != null) {
+						packet = ClientPacket.vote(tokens[1]);
+					} else {
+						System.out.println("error with vote: must provide a username");
+					}
+					break;
+				case "/getgamestatus":
+					packet = ClientPacket.getGameStatus();
+					break;
+				default:
+					System.out.println("Not a vaild command");
+					break;
+			}
+			
+		} else { //not a command, just text so use chat packet
+			packet = ClientPacket.chat(input);
+            sendPacket(packet, outBuffer);
+		}
+		
+		
 		
 	}
-
+	
     static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException
     {
     	int size = p.getPacketSize();
     	ByteBuffer buf = ByteBuffer.allocateDirect(size);
     	p.write(buf);
     	buf.rewind();
-    	outBuffer.write(buf.array());  		
+    	byte[] bytes = new byte[size];
+    	buf.get(bytes);
+    	outBuffer.write(bytes);  		
 	}
 	
     public static void main(String args[]) throws Exception 
@@ -78,10 +154,10 @@ class TCPClient {
 	        while (!line.equals("logout"))
 	        {   
 		        // wait for data!
-		        while (isDataAvailable == 0)   
+		        /*while (isDataAvailable == 0)   
 		        {		        	
 		        	isDataAvailable = inData.available();// inData.available(); 
-		        }
+		        }*/
 
 		        System.out.print(isDataAvailable);
 		        // read the data!
@@ -94,35 +170,9 @@ class TCPClient {
 		        	isDataAvailable = inData.available();		        	
 		        }
 		        
-		        /*
-	            String[] split = line.split(" ");
-	            split[0] = split[0].replaceAll("\\s+", "");		// trim whitespace from command
-	            
-	            // Send to the server
-	            outBuffer.writeBytes(line + "\n"); 
-	
-				// List command detection
-	        	if (split[0].equals("list"))
-	        	{
-	        		receiveFileList(inData); //receive file list
-	        	}
-				//Get command detection
-	        	else if (split[0].equals("get"))
-	        	{
-	        		String filename = split.length > 1 ? split[1] : "noname";	//parse filename from user command.. use "noname" if none is given
-	        		int port = clientSocket.getLocalPort(); //get client port
-	        		String destfile = filename + "-" + port; //concatenate new filename
-	        		receiveFile(inData, inBuffer, destfile); //getFile    			
-	        	}
-	        	else
-	        	{
-		            // Getting response from the server
-		            line = inBuffer.readLine();
-		            System.out.println("Server: " + line);
-	        	}   
-	        	*/
 	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
 	            line = inFromUser.readLine(); 
+	            parseCommand(line, outBuffer);
 	        }
 	        
 	        // Close the socket

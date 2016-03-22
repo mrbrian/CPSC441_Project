@@ -2,7 +2,7 @@ package game_space;
 
 import java.util.ArrayList;
 
-import clients.Players;
+import clients.Player;
 
 public class LobbyLogic{
 	
@@ -22,7 +22,6 @@ public class LobbyLogic{
 	
 	public boolean connectUser(String user, String password){
 		return false;
-		
 	}
 	
 	public void login(String username, String password){
