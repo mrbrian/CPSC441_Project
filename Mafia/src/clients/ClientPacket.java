@@ -40,7 +40,8 @@ public class ClientPacket {
 		buffer.put(data);
 	}
 	
-	public ClientPacket loginRegPacket(String username, String password){
+	// For when a login event is taking place
+	public ClientPacket loginPacket(String username, String password){
 		int totalSize = username.length() + password.length() + 4;
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 		
@@ -58,6 +59,27 @@ public class ClientPacket {
 		return new ClientPacket(PacketType.Login, credentials);
 	}
 	
+	public ClientPacket createAccountPacket(String username, String password){
+		int totalSize = username.length() + password.length() + 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putShort((short)username.length());
+		buffer.put(username.getBytes());
+		
+		buffer.putShort((short)password.length());
+		buffer.put(password.getBytes());
+		
+		buffer.flip();
+		
+		byte[] credentials = new byte[totalSize];
+		buffer.get(credentials);
+		
+		return new ClientPacket(PacketType.CreateAccount, credentials);
+	}
+	
+	/* Could possibly merge all these "mini methods" into a single method
+	 * and add an extra parameter to indicate what type of event it is
+	 * */
 	public ClientPacket logout(){
 		return new ClientPacket(PacketType.Logout, null);
 	}
