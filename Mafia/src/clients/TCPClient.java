@@ -8,12 +8,9 @@ package clients;
  */
 
 
-import java.awt.image.DataBuffer;
 import java.io.*; 
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.channels.SocketChannel; 
 import networks.ServerPacket; 
 
 class TCPClient { 
@@ -52,6 +49,7 @@ class TCPClient {
 				case "/login":	
 					if (tokens[1] != null && tokens[2] != null) {
 						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
+						sendPacket(packet, outBuffer);
 					} else {
 						System.out.println("error with login: must provide a username and password");
 					}

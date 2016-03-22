@@ -12,9 +12,15 @@ public class ReadyRoom{
 	private ArrayList<String[]> playerList;
 	private boolean allReady;
 	private GameSpace game;
+	private int id;
 	
-	public ReadyRoom(){
+	public ReadyRoom(int id){
+		this.id = id;
 		playerList = new ArrayList<String[]>();
+	}
+
+	public int getId(){
+		return id;
 	}
 	
 	public boolean joinRoom(String IP, String playerName) {
@@ -32,8 +38,7 @@ public class ReadyRoom{
 			return true;
 		} else {
 			return false;
-		}
-		
+		}		
 	}
 	
 	
