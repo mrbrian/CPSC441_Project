@@ -1,10 +1,11 @@
 package game_space;
 
 import java.util.Random;
+
+import client.Player;
+
 import java.util.ArrayList;
 import java.util.Random;
-
-import clients.Player;
 
 public class GameSpace{
 	private Random randGen;

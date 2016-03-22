@@ -1,4 +1,4 @@
-package clients;
+package client;
 
 /*
  * A simple TCP client that sends messages to a server and display the message
@@ -11,7 +11,8 @@ package clients;
 import java.io.*; 
 import java.net.*;
 import java.nio.ByteBuffer;
-import networks.ServerPacket; 
+
+import server.ServerPacket; 
 
 class TCPClient { 
 
@@ -32,7 +33,7 @@ class TCPClient {
 	{
 		String delims = "[ ]+";
 		String[] tokens = input.split(delims);
-		ClientPacket packet;
+		ClientPacket packet = null;
 		
 		
 		if (tokens.length > 0 && tokens[0].charAt(0) == '/') { //is a command
@@ -49,7 +50,6 @@ class TCPClient {
 				case "/login":	
 					if (tokens[1] != null && tokens[2] != null) {
 						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
-						sendPacket(packet, outBuffer);
 					} else {
 						System.out.println("error with login: must provide a username and password");
 					}
@@ -98,6 +98,8 @@ class TCPClient {
 					System.out.println("Not a vaild command");
 					break;
 			}
+			if (packet != null)
+				sendPacket(packet, outBuffer);
 			
 		} else { //not a command, just text so use chat packet
 			packet = ClientPacket.chat(input);

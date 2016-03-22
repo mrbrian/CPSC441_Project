@@ -1,4 +1,4 @@
-package clients;
+package client;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

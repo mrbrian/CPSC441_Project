@@ -1,4 +1,4 @@
-package clients;
+package client;
 
 import java.util.ArrayList;
 
@@ -94,5 +94,9 @@ public class Player {
 
 	public void setUsername(String u) {
 		username = u;
+	}
+
+	public Object getUsername() {
+		return username;
 	}	
 }

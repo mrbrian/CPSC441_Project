@@ -3,9 +3,9 @@ import static org.junit.Assert.*;
 import java.nio.ByteBuffer;
 import org.junit.Test;
 
-import clients.ClientPacket;
-import networks.ServerPacket;
-import networks.ServerPacket.PacketType;
+import client.ClientPacket;
+import server.ServerPacket;
+import server.ServerPacket.PacketType;
 
 public class UnitTests {
 

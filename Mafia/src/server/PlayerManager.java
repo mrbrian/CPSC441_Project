@@ -1,10 +1,10 @@
-package networks;
+package server;
 
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
-import clients.Player;
+import client.Player;
 
 public class PlayerManager 
 {

@@ -1,4 +1,4 @@
-package networks;
+package server;
 
 public class Server {
 

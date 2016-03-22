@@ -1,8 +1,8 @@
-package networks;
+package server;
 
 import java.util.ArrayList;
 
-import clients.Player;
+import client.Player;
 import game_space.ReadyRoom;
 
 public class RoomManager {

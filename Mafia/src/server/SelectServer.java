@@ -1,4 +1,4 @@
-package networks;
+package server;
 
 /*
  * A simple TCP select server that accepts multiple connections and echo message back to the clients
@@ -12,8 +12,9 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 
-import clients.ClientPacket;
-import clients.Player;
+import client.ClientPacket;
+import client.Player;
+import client.packets.*;
 
 public class SelectServer 
 {
@@ -66,20 +67,13 @@ public class SelectServer
     			player.setPseudonym(pseudo);
 	    		break;
 	    	case Login:	    
-    			ByteBuffer bb = ByteBuffer.allocate(2);
-    			bb.put(p.data[0]);
-    			bb.put(p.data[1]);
-    			short username_length = bb.getShort(0);
-    			
-    			String username = new String(p.data, 2, username_length);
-    			String password = new String(p.data, 2 + username_length + 2, p.dataSize - (2 + username_length + 2));
-    			
+	    		ClientLoginPacket clp = new ClientLoginPacket(p);
+	    		
 	    		// update player info		
     			Player new_player = new Player();
     			new_player.setIPAddress(socketAddress.toString());
-    			new_player.setUsername(username);
+    			new_player.setUsername(clp.username);
     			
-    			// ... need to bind with ipaddress.
 	    		plyr_mgr.addPlayer(new_player);	// if valid auth details given
 	    		break;
 	    	case Join:
@@ -87,11 +81,14 @@ public class SelectServer
 	    		int rmIdx = p.data[0];	    		
 	    		room_mgr.findRoom(rmIdx);
 	    		player.setRoomIndex(rmIdx);
-	    		System.out.println(String.format("Join [%s]: %d", socketAddress.toString(), rmIdx));	    		
+	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));	    		
 	    		break;
 	    	case Chat:
-	    		String msg = new String(p.data, 0, p.dataSize);
-	    		System.out.println(String.format("Chat [%s]: %s", socketAddress.toString(), msg));
+	    		if (player != null)
+    			{
+		    		String msg = new String(p.data, 0, p.dataSize);
+		    		System.out.println(String.format("Chat [%s]: %s", player.getUsername(), msg));
+    			}
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));

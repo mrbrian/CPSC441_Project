@@ -2,7 +2,7 @@ package game_space;
 
 import java.util.ArrayList;
 
-import clients.Player;
+import client.Player;
 
 public class LobbyLogic{
 	
