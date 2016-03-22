@@ -57,22 +57,37 @@ public class SelectServer
     void processPacket(ClientPacket p, SocketAddress socketAddress)
     {
     	Player player = plyr_mgr.findPlayer(socketAddress);
+    	ByteBuffer bb;
+    	String username;
+    	String password;
+    	
     	switch (p.type)
     	{
 	    	case CreateAccount:
+	    		bb = ByteBuffer.allocate(2);
+	    		bb.put(p.data[0]);
+	    		bb.put(p.data[1]);
+	    		short usernameLength = bb.getShort(0);
+	    		
+	    		username = new String(p.data, 2, usernameLength);
+    			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));
+    			
+    			WriteToFile saveInfo = new WriteToFile();
+    			saveInfo.saveUserData(username, password);
+	    		
 	    		break;
 	    	case SetAlias:
 	    		String pseudo = new String(p.data, 0, p.dataSize);
     			player.setPseudonym(pseudo);
 	    		break;
 	    	case Login:	    
-    			ByteBuffer bb = ByteBuffer.allocate(2);
+    			bb = ByteBuffer.allocate(2);
     			bb.put(p.data[0]);
     			bb.put(p.data[1]);
     			short username_length = bb.getShort(0);
     			
-    			String username = new String(p.data, 2, username_length);
-    			String password = new String(p.data, 2 + username_length + 2, p.dataSize - (2 + username_length + 2));
+    			username = new String(p.data, 2, username_length);
+    			password = new String(p.data, 2 + username_length + 2, p.dataSize - (2 + username_length + 2));
     			
 	    		// update player info		
     			Player new_player = new Player();

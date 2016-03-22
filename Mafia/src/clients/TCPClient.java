@@ -42,6 +42,7 @@ class TCPClient {
 				case "/createaccount":
 					if (tokens[1] != null && tokens[2] != null) {
 						packet = ClientPacket.createAccountPacket(tokens[1],tokens[2]);
+						sendPacket(packet, outBuffer);
 					} else {
 						System.out.println("error with createaccount: must provide a username and password");
 					}
