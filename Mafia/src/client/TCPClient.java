@@ -66,7 +66,7 @@ class TCPClient {
 					break;
 				case "/join":
 					if (tokens[1] != null) {
-						packet = ClientPacket.join(tokens[1]);
+						packet = ClientPacket.join(Integer.parseInt(tokens[1]));
 					} else {
 						System.out.println("error with join: must provide a room id");
 					}

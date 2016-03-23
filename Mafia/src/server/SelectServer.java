@@ -30,6 +30,7 @@ public class SelectServer
     
 	SelectServer(int port) throws IOException
 	{
+		room_mgr = new RoomManager();
 		plyr_mgr = new PlayerManager();
 		        
         // Initialize the selector
@@ -67,19 +68,20 @@ public class SelectServer
     			player.setPseudonym(pseudo);
 	    		break;
 	    	case Login:	    
-	    		ClientLoginPacket clp = new ClientLoginPacket(p);
-	    		
+	    		ClientLoginPacket clp = new ClientLoginPacket(p);	    		
 	    		// update player info		
     			Player new_player = new Player();
     			new_player.setIPAddress(socketAddress.toString());
     			new_player.setUsername(clp.username);
     			
 	    		plyr_mgr.addPlayer(new_player);	// if valid auth details given
+	    		System.out.println(String.format("Login [%s]", new_player.getUsername()));	
 	    		break;
 	    	case Join:
-	    		// join or if not exist, create room
-	    		int rmIdx = p.data[0];	    		
-	    		room_mgr.findRoom(rmIdx);
+	    		// will join or if not exist, create room 
+	    		ClientJoinPacket cjp = new ClientJoinPacket(p);
+	    		
+	    		int rmIdx = room_mgr.open(cjp.roomId);
 	    		player.setRoomIndex(rmIdx);
 	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));	    		
 	    		break;

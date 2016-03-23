@@ -10,6 +10,11 @@ public class RoomManager {
 	int roomCounter;
 	ArrayList<ReadyRoom> rooms;
 	
+	public RoomManager()
+	{
+		rooms = new ArrayList<ReadyRoom>();
+	}
+	
 	public ReadyRoom create()
 	{
 		ReadyRoom room = new ReadyRoom(roomCounter);
@@ -28,15 +33,19 @@ public class RoomManager {
 		return null;
 	}
 	
-	public ReadyRoom open(Player p, int rmIdx) 
+	public int open(int rmIdx) 
 	{
 		ReadyRoom room = findRoom(rmIdx);
 		
-		//room.joinRoom(IP, playerName);
+		if (room == null)
+			room = create();
 		
 		if (room != null)
-			return room;
-		else		
-			return create(); 		
+		{
+			//room.joinRoom(IP, playerName);			
+			return rmIdx;
+		}
+		
+		return -1;
 	}
 }

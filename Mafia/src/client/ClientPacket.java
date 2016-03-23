@@ -86,8 +86,17 @@ public class ClientPacket {
 		return new ClientPacket(PacketType.SetAlias, alias.getBytes());
 	}
 	
-	public static ClientPacket join(String roomId){
-		return new ClientPacket(PacketType.Join, roomId.getBytes());
+	public static ClientPacket join(int roomId){
+		int totalSize = 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putInt(roomId);
+		buffer.flip();
+		
+		byte[] data = new byte[totalSize];
+		buffer.get(data);
+		
+		return new ClientPacket(PacketType.Join, data);
 	}
 	
 	public static ClientPacket invite(String username){
