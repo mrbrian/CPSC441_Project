@@ -40,25 +40,7 @@ public class ClientPacket {
 		buffer.put(data);
 	}
 	
-	//create account packet
-	public static ClientPacket createAccountPacket(String username, String password){
-		int totalSize = username.length() + password.length() + 4;
-		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-		
-		buffer.putShort((short)username.length());
-		buffer.put(username.getBytes());
-		
-		buffer.putShort((short)password.length());
-		buffer.put(password.getBytes());
-		
-		buffer.flip();
-		
-		byte[] credentials = new byte[totalSize];
-		buffer.get(credentials);
-		
-		return new ClientPacket(PacketType.CreateAccount, credentials);
-	}
-	
+
 	//login to account packet
 	public static ClientPacket loginPacket(String username, String password){
 		int totalSize = username.length() + password.length() + 4;
@@ -78,6 +60,28 @@ public class ClientPacket {
 		return new ClientPacket(PacketType.Login, credentials);
 	}
 	
+	
+	public static ClientPacket createAccountPacket(String username, String password){
+		int totalSize = username.length() + password.length() + 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putShort((short)username.length());
+		buffer.put(username.getBytes());
+		
+		buffer.putShort((short)password.length());
+		buffer.put(password.getBytes());
+		
+		buffer.flip();
+		
+		byte[] credentials = new byte[totalSize];
+		buffer.get(credentials);
+		
+		return new ClientPacket(PacketType.CreateAccount, credentials);
+	}
+	
+	/* Could possibly merge all these "mini methods" into a single method
+	 * and add an extra parameter to indicate what type of event it is
+	 * */
 	public static ClientPacket logout(){
 		return new ClientPacket(PacketType.Logout, null);
 	}

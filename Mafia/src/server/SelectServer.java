@@ -15,6 +15,7 @@ import java.util.*;
 import client.ClientPacket;
 import client.Player;
 import client.packets.*;
+import server.FileIO;
 
 public class SelectServer 
 {
@@ -59,9 +60,29 @@ public class SelectServer
     void processPacket(ClientPacket p, SocketAddress socketAddress)
     {
     	Player player = plyr_mgr.findPlayer(socketAddress);
+    	ByteBuffer bb;
+    	String username;
+    	String password;
+    	
     	switch (p.type)
     	{
 	    	case CreateAccount:
+	    		bb = ByteBuffer.allocate(2);
+	    		bb.put(p.data[0]);
+	    		bb.put(p.data[1]);
+	    		short usernameLength = bb.getShort(0);
+	    		
+	    		username = new String(p.data, 2, usernameLength);
+    			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));
+    			
+    			FileIO saveInfo = new FileIO();
+    			
+    			if(!saveInfo.doesUsrExist(username)){
+    				saveInfo.saveUserData(username, password);
+    			}else{
+    				System.out.println("Username already exists !");
+    			}
+    			
 	    		break;
 	    	case SetAlias:
 	    		String pseudo = new String(p.data, 0, p.dataSize);
