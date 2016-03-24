@@ -1,9 +1,16 @@
-package client;
+package players;
 
 import java.util.ArrayList;
 
 public class Player {
 
+	public enum PlayerState
+	{		
+		Not_Logged_In,
+		Logged_In,
+		In_Room
+	}
+	
 	private String username;
 	private String pseudonym;
 	
@@ -12,10 +19,9 @@ public class Player {
 	
 	private PlayerTypes.PlayerType playerType;
 	
+	private PlayerState state;
 	private int roomIndex;
 	private boolean isAlive;
-	private ArrayList<String> votedWho;	
-	
 	/*
 	 *	Client initiates	 
 	 * 		- Reply from server
@@ -36,9 +42,10 @@ public class Player {
 	
 	
 	public Player(){
+		state = PlayerState.Not_Logged_In;
 		roomIndex = -1;
 		isAlive = false;
-		votedWho = new ArrayList<>();
+		new ArrayList<>();
 		playerType = null;
 	}
 	
@@ -94,6 +101,16 @@ public class Player {
 
 	public void setUsername(String u) {
 		username = u;
+	}
+	
+	public void setState(PlayerState s)
+	{
+		state = s;
+	}
+
+	public PlayerState getState()
+	{
+		return state;
 	}
 
 	public Object getUsername() {

@@ -2,7 +2,7 @@ package game_space;
 
 import java.util.Random;
 
-import client.Player;
+import players.Player;
 
 import java.util.ArrayList;
 import java.util.Random;

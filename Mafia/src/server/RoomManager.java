@@ -2,7 +2,6 @@ package server;
 
 import java.util.ArrayList;
 
-import client.Player;
 import game_space.ReadyRoom;
 
 public class RoomManager {

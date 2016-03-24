@@ -13,8 +13,9 @@ import java.nio.channels.*;
 import java.util.*;
 
 import client.ClientPacket;
-import client.Player;
 import client.packets.*;
+import players.Player;
+import players.Player.PlayerState;
 import server.FileIO;
 
 public class SelectServer 
@@ -54,7 +55,7 @@ public class SelectServer
 
 	void sendMessage(String msg, SocketChannel ch) throws IOException
 	{
-		ServerPacket p = new ServerPacket(ServerPacket.PacketType.Acknowledge, msg, new byte[] {});
+		ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
 		sendPacket(p, ch);
 	}
 	
@@ -66,18 +67,19 @@ public class SelectServer
     	ch.write(inBuffer);    	
     }    
     
-    void processPacket(ClientPacket p, SocketChannel ch) throws IOException
+    void processUnrestrictedCommands(ClientPacket p, SocketChannel ch) throws IOException
     {
     	SocketAddress socketAddress = ch.getRemoteAddress();
-    	
+
     	Player player = plyr_mgr.findPlayer(socketAddress);
+    	
     	ByteBuffer bb;
     	String username;
     	String password;
     	
     	switch (p.type)
-    	{
-	    	case CreateAccount:
+		{
+			case CreateAccount:
 	    		bb = ByteBuffer.allocate(2);
 	    		bb.put(p.data[0]);
 	    		bb.put(p.data[1]);
@@ -96,22 +98,36 @@ public class SelectServer
     			}
     			
 	    		break;
+	    	case Login:	    
+	    		ClientLoginPacket clp = new ClientLoginPacket(p);	    		
+	    		// update player info		
+    			player.setUsername(clp.username);
+    			player.setState(PlayerState.Logged_In);
+    			
+	    		plyr_mgr.addPlayer(player);	// if valid auth details given
+	    		System.out.println(String.format("Login [%s]", player.getUsername()));
+	    		
+	    		sendMessage(String.format("Logged in successfully as: %s", clp.username), ch);
+	    		break;	
+			default:
+	    		sendMessage("Log in first!", ch);
+				break;
+		}
+    }
+    
+    void processLoggedInCommands(ClientPacket p, SocketChannel ch) throws IOException
+    {
+    	SocketAddress socketAddress = ch.getRemoteAddress();
+    	
+    	Player player = plyr_mgr.findPlayer(socketAddress);
+    	
+    	switch (p.type)
+    	{
 	    	case SetAlias:
 	    		String pseudo = new String(p.data, 0, p.dataSize);
     			player.setPseudonym(pseudo);
 	    		break;
-	    	case Login:	    
-	    		ClientLoginPacket clp = new ClientLoginPacket(p);	    		
-	    		// update player info		
-    			Player new_player = new Player();
-    			new_player.setIPAddress(socketAddress.toString());
-    			new_player.setUsername(clp.username);
-    			
-	    		plyr_mgr.addPlayer(new_player);	// if valid auth details given
-	    		System.out.println(String.format("Login [%s]", new_player.getUsername()));
-	    		
-	    		sendMessage(String.format("Logged in successfully as: %s", clp.username), ch);
-	    		break;
+	    	
 	    	case Join:
 	    		// will join or if not exist, create room 
 	    		ClientJoinPacket cjp = new ClientJoinPacket(p);
@@ -123,15 +139,52 @@ public class SelectServer
 	    		sendMessage(String.format("Joined room #: %d", rmIdx), ch);
 	    		break;
 	    	case Chat:
-	    		if (player != null)
-    			{
-		    		String msg = new String(p.data, 0, p.dataSize);
-		    		System.out.println(String.format("Chat [%s]: %s", player.getUsername(), msg));
-    			}
+	    		String msg = new String(p.data, 0, p.dataSize);
+	    		System.out.println(String.format("Chat [%s]: %s", player.getUsername(), msg));	    			
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
+    			sendMessage(String.format("Could not process command: %s",  p.type.toString()), ch);
     			break;
+    	}
+    }
+
+    void processRoomCommands(ClientPacket p, SocketChannel ch) throws IOException
+    {
+    	SocketAddress socketAddress = ch.getRemoteAddress();
+    	
+    	Player player = plyr_mgr.findPlayer(socketAddress);
+    	
+    	switch (p.type)
+    	{	    	
+    		default:
+    			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
+    			break;
+    	}
+    }
+    
+    void processPacket(ClientPacket p, SocketChannel ch) throws IOException
+    {
+    	SocketAddress socketAddress = ch.getRemoteAddress();
+    	
+    	Player player = plyr_mgr.findPlayer(socketAddress);
+    	
+    	if (player == null)
+    		return;
+    	
+    	PlayerState pState = player.getState();
+    	
+    	if (pState == PlayerState.Not_Logged_In) 
+    	{
+    		processUnrestrictedCommands(p, ch);	
+    	}
+    	else if (pState == PlayerState.Logged_In) 
+    	{
+	    	processLoggedInCommands(p, ch);
+    	}
+    	else if (pState == PlayerState.In_Room) 
+    	{
+	    	processRoomCommands(p, ch);
     	}
     }
     
@@ -174,7 +227,8 @@ public class SelectServer
                         
                         Player plyr = new Player();
                         plyr.setIPAddress(cchannel.getRemoteAddress().toString());
-                        
+        	    		plyr_mgr.addPlayer(plyr);	// if valid auth details given
+        	    		
                         sendMessage("Welcome", cchannel);                    
                         //sendPacket(p, cchannel); 
                     } 

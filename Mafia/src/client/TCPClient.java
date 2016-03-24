@@ -17,9 +17,7 @@ import server.ServerPacket;
 class TCPClient { 
 
 	public static void processPacket(ServerPacket p)
-	{
-		ServerPacket.PacketType pt;
-		
+	{		
 		switch (p.pType)
 		{			
 			default:
@@ -147,8 +145,6 @@ class TCPClient {
 	        	        
 	        while (!line.equals("logout"))
 	        {   
-		        System.out.print(isDataAvailable);
-
 		        // check for data  
 	        	isDataAvailable = inData.available();	
 		        

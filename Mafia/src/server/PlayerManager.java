@@ -4,7 +4,7 @@ import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
-import client.Player;
+import players.Player;
 
 public class PlayerManager 
 {
