@@ -100,10 +100,7 @@ class TCPClient {
 		} else { //not a command, just text so use chat packet
 			packet = ClientPacket.chat(input);
             sendPacket(packet, outBuffer);
-		}
-		
-		
-		
+		}		
 	}
 	
     static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException

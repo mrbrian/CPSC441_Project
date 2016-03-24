@@ -8,7 +8,8 @@ public class Player {
 	{		
 		Not_Logged_In,
 		Logged_In,
-		In_Room
+		In_Room,
+		Reconnect_Waiting
 	}
 	
 	private String username;
@@ -38,9 +39,7 @@ public class Player {
 	 * 
 	 * 
 	 * */
-	
-	
-	
+		
 	public Player(){
 		state = PlayerState.Not_Logged_In;
 		roomIndex = -1;
