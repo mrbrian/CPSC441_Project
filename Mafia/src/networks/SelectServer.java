@@ -27,6 +27,8 @@ public class SelectServer
     CharBuffer cBuffer;
     Selector selector;
     
+    FileIO saveInfo;
+    
 	SelectServer(int port) throws IOException
 	{
 		plyr_mgr = new PlayerManager();
@@ -44,6 +46,8 @@ public class SelectServer
 
         // Register that the server selector is interested in connection requests
         tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+        
+        saveInfo = new FileIO();
 	}
 	
     void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
@@ -63,6 +67,7 @@ public class SelectServer
     	
     	switch (p.type)
     	{
+    		// Gets new username and password and stores in "save_file"
 	    	case CreateAccount:
 	    		bb = ByteBuffer.allocate(2);
 	    		bb.put(p.data[0]);
@@ -72,12 +77,10 @@ public class SelectServer
 	    		username = new String(p.data, 2, usernameLength);
     			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));
     			
-    			FileIO saveInfo = new FileIO();
-    			
     			if(saveInfo.doesUsrExist(username)){
-    				saveInfo.saveUserData(username, password);
+    				System.out.println("Error Username Already Exists");
     			}else{
-    				System.out.println("Username already exists !");
+    				saveInfo.saveUserData(username, password);
     			}
     			
 	    		break;
@@ -93,6 +96,12 @@ public class SelectServer
     			
     			username = new String(p.data, 2, username_length);
     			password = new String(p.data, 2 + username_length + 2, p.dataSize - (2 + username_length + 2));
+    			
+    			if(saveInfo.checkCredentials(username, password)){
+    				System.out.println("Access Granted !");
+    			}else{
+    				System.out.println("Access Denied !");
+    			}
     			
 	    		// update player info		
     			Player new_player = new Player();
