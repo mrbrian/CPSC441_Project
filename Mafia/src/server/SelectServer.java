@@ -28,9 +28,12 @@ public class SelectServer
     ByteBuffer inBuffer;
     CharBuffer cBuffer;
     Selector selector;
+    int port;
     
 	SelectServer(int port) throws IOException
 	{
+		this.port = port;
+		
 		room_mgr = new RoomManager();
 		plyr_mgr = new PlayerManager();
 		        
@@ -48,6 +51,12 @@ public class SelectServer
         // Register that the server selector is interested in connection requests
         tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
 	}
+
+	void sendMessage(String msg, SocketChannel ch) throws IOException
+	{
+		ServerPacket p = new ServerPacket(ServerPacket.PacketType.Acknowledge, msg, new byte[] {});
+		sendPacket(p, ch);
+	}
 	
     void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
     {
@@ -57,8 +66,10 @@ public class SelectServer
     	ch.write(inBuffer);    	
     }    
     
-    void processPacket(ClientPacket p, SocketAddress socketAddress)
+    void processPacket(ClientPacket p, SocketChannel ch) throws IOException
     {
+    	SocketAddress socketAddress = ch.getRemoteAddress();
+    	
     	Player player = plyr_mgr.findPlayer(socketAddress);
     	ByteBuffer bb;
     	String username;
@@ -80,7 +91,8 @@ public class SelectServer
     			if(!saveInfo.doesUsrExist(username)){
     				saveInfo.saveUserData(username, password);
     			}else{
-    				System.out.println("Username already exists !");
+    				System.out.println("Username already exists !");   
+    	    		sendMessage("Username already exists!", ch); 				
     			}
     			
 	    		break;
@@ -96,7 +108,9 @@ public class SelectServer
     			new_player.setUsername(clp.username);
     			
 	    		plyr_mgr.addPlayer(new_player);	// if valid auth details given
-	    		System.out.println(String.format("Login [%s]", new_player.getUsername()));	
+	    		System.out.println(String.format("Login [%s]", new_player.getUsername()));
+	    		
+	    		sendMessage(String.format("Logged in successfully as: %s", clp.username), ch);
 	    		break;
 	    	case Join:
 	    		// will join or if not exist, create room 
@@ -104,7 +118,9 @@ public class SelectServer
 	    		
 	    		int rmIdx = room_mgr.open(cjp.roomId);
 	    		player.setRoomIndex(rmIdx);
-	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));	    		
+	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
+
+	    		sendMessage(String.format("Joined room #: %d", rmIdx), ch);
 	    		break;
 	    	case Chat:
 	    		if (player != null)
@@ -121,6 +137,7 @@ public class SelectServer
     
     public void run() throws Exception 
     {
+    	System.out.println("Server running on port: " + port );
         // Wait for something happen among all registered sockets
         try {
             boolean terminated = false;
@@ -158,13 +175,8 @@ public class SelectServer
                         Player plyr = new Player();
                         plyr.setIPAddress(cchannel.getRemoteAddress().toString());
                         
-                        ServerPacket p = new ServerPacket(
-                    			ServerPacket.PacketType.Acknowledge,
-                    			"Welcome!",
-                    			new byte[]{1,2,3,4,5}
-                    		);
-                    
-                        sendPacket(p, cchannel); 
+                        sendMessage("Welcome", cchannel);                    
+                        //sendPacket(p, cchannel); 
                     } 
                     else 
                     {
@@ -193,7 +205,7 @@ public class SelectServer
                             while (inBuffer.hasRemaining())
                             {
 	                            ClientPacket cp = ClientPacket.read(inBuffer);
-	                            processPacket(cp, cchannel.getRemoteAddress());
+	                            processPacket(cp, cchannel);
                             }
                     	}
                     }

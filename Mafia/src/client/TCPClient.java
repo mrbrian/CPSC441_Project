@@ -21,13 +21,12 @@ class TCPClient {
 		ServerPacket.PacketType pt;
 		
 		switch (p.pType)
-		{
+		{			
 			default:
 				System.out.println(String.format("%s: %s", p.pType.toString(), p.msg));	            
 				break;
 		}	
 	}
-
 	
 	public static void parseCommand(String input, DataOutputStream outBuffer) throws IOException
 	{
@@ -35,8 +34,7 @@ class TCPClient {
 		String[] tokens = input.split(delims);
 		ClientPacket packet = null;
 		
-		
-		if (tokens.length > 0 && tokens[0].charAt(0) == '/') { //is a command
+		if (tokens.length > 0 && tokens[0].length() > 0 && tokens[0].charAt(0) == '/') { //is a command
 			String command = tokens[0];
 			
 			switch (command) {
@@ -146,22 +144,16 @@ class TCPClient {
 	        // expect a welcome packet from server.
 	        
 	        int isDataAvailable = 0;
-	        
-	        // Get user input and send to the server
-	        // Display the echo meesage from the server
-	        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-      
+	        	        
 	        while (!line.equals("logout"))
 	        {   
-		        // wait for data!
-		        /*while (isDataAvailable == 0)   
-		        {		        	
-		        	isDataAvailable = inData.available();// inData.available(); 
-		        }*/
-
 		        System.out.print(isDataAvailable);
-		        // read the data!
-		        while (isDataAvailable > 0)
+
+		        // check for data  
+	        	isDataAvailable = inData.available();	
+		        
+	        	// read data
+	        	while (isDataAvailable > 0)
 		        {
 		        	// read a packet
 		        	
@@ -171,6 +163,8 @@ class TCPClient {
 		        }
 		        
 	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
+
+	            // Get user input and parse command
 	            line = inFromUser.readLine(); 
 	            parseCommand(line, outBuffer);
 	        }
@@ -183,65 +177,4 @@ class TCPClient {
         	System.out.println(e);
         }       
     } 
-    
-	// helper function to 
-    static void receiveFile(DataInputStream dataBuffer, BufferedReader inBuffer, String destfile)
-    {
-		int bytesRead = 0;
-		try
-		{
-			long filesize = dataBuffer.readLong(); // get file size
-		
-			if (filesize == -1)		// file error
-			{
-	            String line = inBuffer.readLine();
-	            System.out.println("Server: " + line);
-				return;
-			}
-			
-			byte[] data = new byte[(int)filesize]; //byte conversion of filesize
-			File content = new File(destfile); //destincation file generation
-			
-			FileOutputStream fos = new FileOutputStream(content); //new FileOutputStream
-	        BufferedOutputStream bos = new BufferedOutputStream(fos); //new BufferedOutputStream
-	
-			bytesRead = dataBuffer.read(data, 0, data.length); //read all bytes from dataBuffer
-		    bos.write(data, 0, bytesRead); //write bytes to the BufferedOutputStream
-		    
-		    bos.flush(); //flush BufferedOutputStream
-			
-		    fos.close(); //close FileOutputStream
-			bos.close(); //close BufferedOutputStream
-			System.out.println("File saved in " + destfile + " (" + filesize + " bytes)"); //print
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-    }
-    
-	//helper function to receive and display file list
-    static void receiveFileList(DataInputStream inBuffer)
-    {
-	    int bytesRead = 0;
-		try
-		{
-			int filesize = inBuffer.readInt(); //read file size
-			
-			byte[] data = new byte[filesize]; //initialize data to byte format
-			bytesRead = inBuffer.read(data, 0, data.length); //get read byte size for error checking
-			if (bytesRead != filesize) //read error
-			{
-				System.out.println("receiveFileList: expected " + filesize + " bytes, read " + bytesRead + " bytes");
-				return;
-			}
-			String text = new String(data, "UTF-8"); //conversion of byte data to String
-		 	
-			System.out.print(text); //display file list
-		}
-		catch(Exception e)
-		{
-			System.out.println(e);
-		}
-    }
 } 
