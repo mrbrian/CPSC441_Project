@@ -53,6 +53,19 @@ public class SelectServer
         tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
 	}
 
+	void sendMessageAll(String msg, SocketChannel ch) throws IOException
+	{
+        Iterator<Player> playerItr = plyr_mgr.iterator();
+
+        while (playerItr.hasNext()) 
+        {		
+        	Player player = playerItr.next();
+        	
+			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+			sendPacket(p, player.getChannel());
+		}
+	}
+	
 	void sendMessage(String msg, SocketChannel ch) throws IOException
 	{
 		ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
@@ -225,8 +238,7 @@ public class SelectServer
                         // Register the new connection for read operation
                         cchannel.register(selector, SelectionKey.OP_READ);
                         
-                        Player plyr = new Player();
-                        plyr.setIPAddress(cchannel.getRemoteAddress().toString());
+                        Player plyr = new Player(cchannel);
         	    		plyr_mgr.addPlayer(plyr);	// if valid auth details given
         	    		
                         sendMessage("Welcome", cchannel);                    
@@ -272,10 +284,10 @@ public class SelectServer
  
         // close all connections
         Set keys = selector.keys();
-        Iterator itr = keys.iterator();
+        Iterator<SelectionKey> itr = keys.iterator();
         while (itr.hasNext()) 
         {
-            SelectionKey key = (SelectionKey)itr.next();
+            SelectionKey key = itr.next();
             //itr.remove();
             if (key.isAcceptable())
             {

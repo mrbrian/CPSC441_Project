@@ -25,6 +25,7 @@ public class GameSpace{
 	private gameState currentState;
 	
 	public GameSpace(ArrayList<Player> connected) {
+		randGen = new Random();
 		players = connected;
 		currentState = gameState.DAY;
 		assignTeams();

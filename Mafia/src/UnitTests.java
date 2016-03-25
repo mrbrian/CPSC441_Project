@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import client.ClientPacket;
+import game_space.ReadyRoom;
+import players.Player;
+import server.PlayerManager;
 import server.ServerPacket;
 import server.ServerPacket.PacketType;
 
@@ -62,7 +65,7 @@ public class UnitTests {
 		if (expected.equals(actual))
 			fail("non match");
 	}
-	
+
 	@Test
 	public void clientPacket_readWrite_Test1_Pass(){
 		ClientPacket clientPacket = new ClientPacket(
@@ -79,6 +82,32 @@ public class UnitTests {
 		ClientPacket actual = ClientPacket.read(bb);
 		
 		if(!expected.equals(actual)){
+			fail("non match");
+		}
+	}
+	
+	@Test
+	public void readyRoom_ReadyTest1(){
+		
+		boolean expected = true;				
+		
+		ReadyRoom room = new ReadyRoom(0);
+
+		PlayerManager pm = new PlayerManager();
+		
+		// add 8 players
+		for (int i = 0; i < 8; i++)
+		{
+			Player p = new Player(null);
+			pm.addPlayer(p);
+			room.joinRoom("", "p" + i);
+		}
+		
+		//room.beginGame(pm);
+		
+		boolean actual = room.gameIsReady(); 		
+		
+		if(!expected == actual){
 			fail("non match");
 		}
 	}

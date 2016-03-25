@@ -3,12 +3,13 @@ package game_space;
 import java.util.ArrayList;
 
 import players.Player;
+import server.PlayerManager;
 
 public class ReadyRoom{
 	
 	private String socket;
 	
-	//playerList is 2-tuple string of (IP,playerName)
+	//playerList is 2-tuple string of (IP,pseudonym)
 	private ArrayList<String[]> playerList;
 	private boolean allReady;
 	private GameSpace game;
@@ -16,20 +17,20 @@ public class ReadyRoom{
 	
 	public ReadyRoom(int id){
 		this.id = id;
-		playerList = new ArrayList<String[]>();
+		playerList = new ArrayList<String[]>();		
 	}
 
 	public int getId(){
 		return id;
 	}
 	
-	public boolean joinRoom(String IP, String playerName) {
-		String[] playerInfo = {IP, playerName};
+	public boolean joinRoom(String IP, String pseudonym) {
+		String[] playerInfo = {IP, pseudonym};
 		boolean canAdd = true;
 		
 		//check if name and IP are unique
 		for (int i = 0; i < playerList.size(); i++) {
-			if (IP.equals(playerList.get(i)[0]) || playerName.equals(playerList.get(i)[1]));
+			if (IP.equals(playerList.get(i)[0]) || pseudonym.equals(playerList.get(i)[1]));
 				canAdd = false;
 		}
 		//add player to list
@@ -55,16 +56,14 @@ public class ReadyRoom{
 	}
 	
 	//done in the server?
-	public GameSpace beginGame(){
+	public GameSpace beginGame(PlayerManager plyr_mgr){
 		//create player objects
 		ArrayList<Player> players = new ArrayList<Player>();
 		
-		Player p;
-		
 		//create players for game
+		
 		for (int i = 0; i < playerList.size(); i++) {
-			p = new Player();
-			p.setIPAddress(playerList.get(i)[0]);
+			Player p = plyr_mgr.findPlayer(playerList.get(i)[0]);
 			players.add(p);
 		}
 		

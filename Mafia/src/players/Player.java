@@ -1,5 +1,7 @@
 package players;
 
+import java.io.IOException;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 public class Player {
@@ -17,7 +19,7 @@ public class Player {
 	
 	private String IPAddress;
 	private String portNumber;
-	
+	private SocketChannel channel;
 	private PlayerTypes.PlayerType playerType;
 	
 	private PlayerState state;
@@ -40,7 +42,19 @@ public class Player {
 	 * 
 	 * */
 		
-	public Player(){
+	public Player(SocketChannel sc){
+		
+		channel = sc;
+		
+		try
+		{
+			this.IPAddress = sc.getRemoteAddress().toString();
+		}
+		catch (Exception e)
+		{
+			this.IPAddress = String.format("invalid player ipaddress: %s", e.getMessage());
+		}
+		
 		state = PlayerState.Not_Logged_In;
 		roomIndex = -1;
 		isAlive = false;
@@ -54,10 +68,6 @@ public class Player {
 	
 	public PlayerTypes.PlayerType getPlayerType(){
 		return playerType;
-	}
-	
-	public void setIPAddress(String IPAddress){
-		this.IPAddress = IPAddress;
 	}
 	
 	public String getIPAddress(){
@@ -114,5 +124,9 @@ public class Player {
 
 	public Object getUsername() {
 		return username;
+	}
+
+	public SocketChannel getChannel() {
+		return channel;
 	}	
 }
