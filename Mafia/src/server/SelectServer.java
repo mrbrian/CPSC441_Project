@@ -14,8 +14,11 @@ import java.util.*;
 
 import client.ClientPacket;
 import client.packets.*;
+import game_space.GameSpace;
+import game_space.ReadyRoom;
 import players.Player;
 import players.Player.PlayerState;
+import players.PlayerTypes.PlayerType;
 import server.FileIO;
 
 public class SelectServer 
@@ -70,6 +73,22 @@ public class SelectServer
 	{
 		ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
 		sendPacket(p, ch);
+	}
+	
+	void sendMessageToGroup(String msg, Player speaker) throws IOException {
+		int roomID = speaker.getRoomIndex();
+		ReadyRoom room = room_mgr.findRoom(roomID);
+		GameSpace game = room.getGameSpace();
+		
+		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
+		
+		for (int i = 0; i < listeners.size(); i++) {
+			Player player = listeners.get(i);
+			
+			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+			sendPacket(p, player.getChannel());
+		}
+		
 	}
 	
     void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
@@ -154,6 +173,24 @@ public class SelectServer
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);
 	    		System.out.println(String.format("Chat [%s]: %s", player.getUsername(), msg));	    			
+	    		break;
+	    	case Logout:
+	    		int roomID = player.getRoomIndex();
+	    		
+	    		if (roomID != -1) {  //then in a game
+	    			ReadyRoom room = room_mgr.findRoom(roomID);
+	    			GameSpace game = room.getGameSpace();
+	    			game.getPlayers().remove(player);
+	    			if (player.getPlayerType() == PlayerType.INNO) { //player is an innocent
+	    				game.getInnocent().remove(player);
+	    			} else { //player is a mafioso
+	    				game.getMafioso().remove(player);
+	    			}
+	    		}
+	    		
+	    		//now remove player from the player manager
+	    		plyr_mgr.removePlayer(player);
+	    		player.getChannel().socket().close();
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));

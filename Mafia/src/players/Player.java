@@ -23,7 +23,7 @@ public class Player {
 	private PlayerTypes.PlayerType playerType;
 	
 	private PlayerState state;
-	private int roomIndex;
+	private int roomIndex;  
 	private boolean isAlive;
 	/*
 	 *	Client initiates	 
@@ -100,7 +100,7 @@ public class Player {
 		this.roomIndex = v;
 	}
 	
-	public int getRoomIndex(int v){
+	public int getRoomIndex(){
 		return this.roomIndex;
 	}
 

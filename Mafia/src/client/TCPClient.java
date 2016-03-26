@@ -37,14 +37,14 @@ class TCPClient {
 			
 			switch (command) {
 				case "/createaccount":
-					if (tokens[1] != null && tokens[2] != null) {
+					if (tokens.length >= 3) {
 						packet = ClientPacket.createAccountPacket(tokens[1],tokens[2]);
 					} else {
 						System.out.println("error with createaccount: must provide a username and password");
 					}
 					break;
 				case "/login":	
-					if (tokens[1] != null && tokens[2] != null) {
+					if (tokens.length >= 3) {
 						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
 					} else {
 						System.out.println("error with login: must provide a username and password");
@@ -54,21 +54,21 @@ class TCPClient {
 					packet = ClientPacket.logout();
 					break;
 				case "/setalias":
-					if (tokens[1] != null) {
+					if (tokens.length >= 2) {
 						packet = ClientPacket.setAlias(tokens[1]);
 					} else {
 						System.out.println("error with setalias: must provide an alias");
 					}
 					break;
 				case "/join":
-					if (tokens[1] != null) {
+					if (tokens.length >= 2) {
 						packet = ClientPacket.join(Integer.parseInt(tokens[1]));
 					} else {
 						System.out.println("error with join: must provide a room id");
 					}
 					break;
 				case "/invite":
-					if (tokens[1] != null) {
+					if (tokens.length >= 2) {
 						packet = ClientPacket.invite(tokens[1]);
 					} else {
 						System.out.println("error with invite: must provide a username");
@@ -81,7 +81,7 @@ class TCPClient {
 					packet = ClientPacket.listRoom();
 					break;
 				case "/vote":
-					if (tokens[1] != null) {
+					if (tokens.length >= 2) {
 						packet = ClientPacket.vote(tokens[1]);
 					} else {
 						System.out.println("error with vote: must provide a username");
