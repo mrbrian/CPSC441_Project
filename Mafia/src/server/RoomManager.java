@@ -12,9 +12,13 @@ public class RoomManager implements Runnable{
 	Thread thread;
 	int roomCounter;
 	ArrayList<ReadyRoom> rooms;
+	SelectServer server;
+	double last_update;
+	boolean quit;
 	
-	public RoomManager()
+	public RoomManager(SelectServer s)
 	{
+		server = s;
 		rooms = new ArrayList<ReadyRoom>();
 		startThread();
 	}
@@ -23,15 +27,22 @@ public class RoomManager implements Runnable{
 	{
 		if (thread == null)
 		{
+			System.out.println("Starting room thread..");
 			thread = new Thread(this, "RoomManager");
 			thread.start();
 		}
 	}
 	
+	public void shutdown()
+	{
+		quit = true;
+	}
+	
 	public ReadyRoom create()
 	{
-		ReadyRoom room = new ReadyRoom(roomCounter);
-		
+		ReadyRoom room = new ReadyRoom(server, roomCounter);
+		Date d = new Date();
+		last_update = (double)d.getTime() / 1000;
 		rooms.add(room);
 		roomCounter++;
 		return room;
@@ -47,7 +58,7 @@ public class RoomManager implements Runnable{
 	}
 	
 	// tries to access the room, if not found, creates a new room (with roomindex = counter++)
-	public int open(int rmIdx) 
+	public ReadyRoom open(int rmIdx) 
 	{
 		ReadyRoom room = findRoom(rmIdx);
 		
@@ -55,12 +66,11 @@ public class RoomManager implements Runnable{
 			room = create();
 		
 		if (room != null)
-		{
-			//room.joinRoom(IP, playerName);			
-			return rmIdx;
+		{		
+			return room;
 		}
 		
-		return -1;
+		return null;
 	}
 
 	public ServerPacket processPacket(ClientPacket p, SocketChannel ch) {
@@ -76,9 +86,23 @@ public class RoomManager implements Runnable{
 
 	@Override
 	public void run() {
-		for (ReadyRoom r : rooms)
+		while (!quit)
 		{
-			r.update(new Date());
+			for (ReadyRoom r : rooms)
+			{
+				Date now = new Date();
+				double currTime = ((double)now.getTime()) / 1000;
+				float elapsedTime = (float)(currTime - last_update);
+				
+				r.update(elapsedTime);
+				last_update = currTime;
+			}
+			try {
+				thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

@@ -11,9 +11,11 @@ public class PlayerManager implements Iterable<Player>
 {
 	private static PlayerManager instance;
 	private ArrayList<Player> players;
+	private SelectServer server;
 	
-	public PlayerManager()
+	public PlayerManager(SelectServer s)
 	{
+		server = s;
 		players = new ArrayList<Player>();	
 	}
 	

@@ -1,6 +1,8 @@
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
+
 import org.junit.Test;
 
 import client.ClientPacket;
@@ -91,19 +93,23 @@ public class UnitTests {
 		
 		boolean expected = true;				
 		
-		ReadyRoom room = new ReadyRoom(0);
+		ReadyRoom room = new ReadyRoom(null, 0);
 
-		PlayerManager pmgr = new PlayerManager();
+		PlayerManager pmgr = new PlayerManager(null);
 		
 		// add 8 players
 		for (int i = 0; i < 8; i++)
 		{
 			Player p = new Player(null);
+			p.setIPAddress("p" + i);
+			p.setPseudonym("p" + i);
 			pmgr.addPlayer(p);
-			room.joinRoom("" + i, "p" + i);			
+			room.joinRoom(p);			
 		}
 				
-		boolean actual = room.gameIsReady(); 		
+		room.update(20);
+		
+		boolean actual = room.getState() == ReadyRoom.State.GameInProgress;  		
 		
 		assertEquals(expected, actual);
 	}

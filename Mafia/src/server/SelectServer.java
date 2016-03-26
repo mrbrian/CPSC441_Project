@@ -23,6 +23,14 @@ import server.FileIO;
 
 public class SelectServer 
 {
+	public enum SendDestination
+	{
+		Single,
+		All,
+		Room,
+		Team
+	}
+	
 	public static int BUFFERSIZE = 256;
 	
 	RoomManager room_mgr;
@@ -38,8 +46,8 @@ public class SelectServer
 	{
 		this.port = port;
 		
-		room_mgr = new RoomManager();
-		plyr_mgr = new PlayerManager();
+		room_mgr = new RoomManager(this);
+		plyr_mgr = new PlayerManager(this);
 		   
 		try {
 	        // Initialize the selector
@@ -61,7 +69,7 @@ public class SelectServer
 		}
 	}
 
-	void sendMessageAll(String msg) 
+	public void sendMessageAll(String msg) 
 	{
         Iterator<Player> playerItr = plyr_mgr.iterator();
 
@@ -74,13 +82,13 @@ public class SelectServer
 		}
 	}
 	
-	void sendMessage(String msg, SocketChannel ch) throws IOException
+	public void sendMessage(String msg, SocketChannel ch)
 	{
 		ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
 		sendPacket(p, ch);
 	}
 	
-	void sendMessageToGroup(String msg, Player speaker) throws IOException {
+	public void sendMessageToGroup(String msg, Player speaker) throws IOException {
 		int roomID = speaker.getRoomIndex();
 		ReadyRoom room = room_mgr.findRoom(roomID);
 		GameSpace game = room.getGameSpace();
@@ -98,12 +106,14 @@ public class SelectServer
 	
     void sendPacket(ServerPacket p, SocketChannel ch) 
     {
+    	if (ch == null)
+    		System.out.println(String.format("sendPacket warning (ch == null): %s ", p.msg));
     	try
     	{
-    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
-    	p.write(inBuffer);
-    	inBuffer.rewind();
-    	ch.write(inBuffer);
+	    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
+	    	p.write(inBuffer);
+	    	inBuffer.rewind();
+	    	ch.write(inBuffer);
     	}
     	catch (IOException e)
     	{
@@ -173,14 +183,17 @@ public class SelectServer
 	    		break;
 	    	
 	    	case Join:
-	    		// will join or if not exist, create room 
-	    		ClientJoinPacket cjp = new ClientJoinPacket(p);
-	    		
-	    		int rmIdx = room_mgr.open(cjp.roomId);
-	    		player.setRoomIndex(rmIdx);
-	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
-
-	    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    		{
+	    			// will join or if not exist, create room 
+		    		ClientJoinPacket cjp = new ClientJoinPacket(p);
+		    		
+		    		ReadyRoom room = room_mgr.open(cjp.roomId);
+					room.joinRoom(player);	
+					int rmIdx = room.getId();
+		    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
+	
+		    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    		}
 	    		break;
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);

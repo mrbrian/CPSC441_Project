@@ -68,9 +68,13 @@ public class Player {
 	public PlayerTypes.PlayerType getPlayerType(){
 		return playerType;
 	}
-	
+
 	public String getIPAddress(){
 		return IPAddress;
+	}
+	
+	public void setIPAddress(String s){
+		IPAddress = s;
 	}
 	
 	public void setPortNumber(String portNumber){
