@@ -6,6 +6,7 @@ import java.util.Date;
 
 import game_space.ReadyRoom.State;
 import players.Player;
+import players.Player.PlayerState;
 import server.PlayerManager;
 import server.SelectServer;
 
@@ -55,6 +56,8 @@ public class ReadyRoom{
 		//add player to list
 		if (canAdd) {
 			playerList.add(player);
+			player.setRoomIndex(id);
+			player.setState(PlayerState.In_Room);
 			return true;
 		} else {
 			return false;

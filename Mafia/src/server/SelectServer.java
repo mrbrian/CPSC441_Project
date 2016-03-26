@@ -11,9 +11,6 @@ import java.net.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
-
-import com.sun.xml.internal.ws.developer.MemberSubmissionEndpointReference.Elements;
-
 import client.ClientPacket;
 import client.packets.*;
 import game_space.GameSpace;
