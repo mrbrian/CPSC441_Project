@@ -272,28 +272,35 @@ public class SelectServer
     	}
     }
     
-    void processPacket(ClientPacket p, SocketChannel ch) throws IOException
+    void processPacket(ClientPacket p, SocketChannel ch)
     {
-    	SocketAddress socketAddress = ch.getRemoteAddress();
-    	
-    	Player player = plyr_mgr.findPlayer(socketAddress);
-    	
-    	if (player == null)
-    		return;
-    	
-    	PlayerState pState = player.getState();
-    	
-    	if (pState == PlayerState.Not_Logged_In) 
+    	try
     	{
-    		processUnrestrictedCommands(p, ch);	
+	    	SocketAddress socketAddress = ch.getRemoteAddress();
+	    	
+	    	Player player = plyr_mgr.findPlayer(socketAddress);
+	    	
+	    	if (player == null)
+	    		return;
+	    	
+	    	PlayerState pState = player.getState();
+	    	
+	    	if (pState == PlayerState.Not_Logged_In) 
+	    	{
+	    		processUnrestrictedCommands(p, ch);	
+	    	}
+	    	else if (pState == PlayerState.Logged_In) 
+	    	{
+		    	processLoggedInCommands(p, ch);
+	    	}
+	    	else if (pState == PlayerState.In_Room) 
+	    	{
+		    	processRoomCommands(p, ch);
+	    	}
     	}
-    	else if (pState == PlayerState.Logged_In) 
+    	catch (IOException e)
     	{
-	    	processLoggedInCommands(p, ch);
-    	}
-    	else if (pState == PlayerState.In_Room) 
-    	{
-	    	processRoomCommands(p, ch);
+    		System.out.println("processPacket error: " + e.getMessage());
     	}
     }
     
@@ -301,82 +308,84 @@ public class SelectServer
     {
     	System.out.println("Server running on port: " + port );
         // Wait for something happen among all registered sockets
-        try {
             boolean terminated = false;
             while (!terminated) 
             {
-                if (selector.select(500) < 0)
-                {
-                    System.out.println("select() failed");
-                    System.exit(1);
+            	try 
+            	{
+                	if (selector.select(500) < 0)
+	                {
+	                    System.out.println("select() failed");
+	                    System.exit(1);
+	                }
+	                
+	                // Get set of ready sockets
+	                Set<SelectionKey> readyKeys = selector.selectedKeys();
+	                Iterator<SelectionKey> readyItor = readyKeys.iterator();
+	
+	                // Walk through the ready set
+	                while (readyItor.hasNext()) 
+	                {
+	                    // Get key from set
+	                    SelectionKey key = (SelectionKey)readyItor.next();
+	
+	                    // Remove current entry
+	                    readyItor.remove();
+	
+	                    // Accept new connections, if any
+	                    if (key.isAcceptable())
+	                    {
+	                        SocketChannel cchannel = ((ServerSocketChannel)key.channel()).accept();
+	                        cchannel.configureBlocking(false);
+	                        System.out.println("Accept connection from " + cchannel.socket().toString());
+	                        
+	                        // Register the new connection for read operation
+	                        cchannel.register(selector, SelectionKey.OP_READ);
+	                        
+	                        Player plyr = new Player(cchannel);
+	        	    		plyr_mgr.addPlayer(plyr);	
+	        	    		
+	                        sendMessage("Welcome", cchannel);                    
+	                        //sendPacket(p, cchannel); 
+	                    } 
+	                    else 
+	                    {
+	                    	SelectableChannel sc = key.channel();
+	                    	
+	                        SocketChannel cchannel = (SocketChannel)sc;
+	                        if (key.isReadable())
+	                        {	                        
+	                            // Open input and output streams
+	                            inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
+	                            cBuffer = CharBuffer.allocate(BUFFERSIZE);
+	                          
+	                            Thread.sleep(100);		
+	
+	                            // Read from socket
+	                            int bytesRecv = cchannel.read(inBuffer);
+	                            if (bytesRecv <= 0)
+	                            {
+	                                System.out.println("read() error, or connection closed");
+	                                key.cancel();  // deregister the socket
+	                                continue;
+	                            }
+	                             
+	                            inBuffer.flip();      // make buffer available  
+	                            
+	                            while (inBuffer.hasRemaining())
+	                            {
+		                            ClientPacket cp = ClientPacket.read(inBuffer);
+		                            processPacket(cp, cchannel);
+	                            }
+	                    	}
+	                    }
+	                } // end of while (readyItor.hasNext()) 
+	            } // end of while (!terminated)
+                catch (IOException e) 
+            	{
+                    System.out.println("SelectServer run error: " + e.getMessage());
                 }
-                
-                // Get set of ready sockets
-                Set<SelectionKey> readyKeys = selector.selectedKeys();
-                Iterator<SelectionKey> readyItor = readyKeys.iterator();
-
-                // Walk through the ready set
-                while (readyItor.hasNext()) 
-                {
-                    // Get key from set
-                    SelectionKey key = (SelectionKey)readyItor.next();
-
-                    // Remove current entry
-                    readyItor.remove();
-
-                    // Accept new connections, if any
-                    if (key.isAcceptable())
-                    {
-                        SocketChannel cchannel = ((ServerSocketChannel)key.channel()).accept();
-                        cchannel.configureBlocking(false);
-                        System.out.println("Accept connection from " + cchannel.socket().toString());
-                        
-                        // Register the new connection for read operation
-                        cchannel.register(selector, SelectionKey.OP_READ);
-                        
-                        Player plyr = new Player(cchannel);
-        	    		plyr_mgr.addPlayer(plyr);	
-        	    		
-                        sendMessage("Welcome", cchannel);                    
-                        //sendPacket(p, cchannel); 
-                    } 
-                    else 
-                    {
-                    	SelectableChannel sc = key.channel();
-                    	
-                        SocketChannel cchannel = (SocketChannel)sc;
-                        if (key.isReadable())
-                        {	                        
-                            // Open input and output streams
-                            inBuffer = ByteBuffer.allocateDirect(BUFFERSIZE);
-                            cBuffer = CharBuffer.allocate(BUFFERSIZE);
-                          
-                            Thread.sleep(100);		
-
-                            // Read from socket
-                            int bytesRecv = cchannel.read(inBuffer);
-                            if (bytesRecv <= 0)
-                            {
-                                System.out.println("read() error, or connection closed");
-                                key.cancel();  // deregister the socket
-                                continue;
-                            }
-                             
-                            inBuffer.flip();      // make buffer available  
-                            
-                            while (inBuffer.hasRemaining())
-                            {
-	                            ClientPacket cp = ClientPacket.read(inBuffer);
-	                            processPacket(cp, cchannel);
-                            }
-                    	}
-                    }
-                } // end of while (readyItor.hasNext()) 
-            } // end of while (!terminated)
-        }
-        catch (IOException e) {
-            System.out.println(e);
-        }
+	        }
  
         // close all connections
         Set<SelectionKey> keys = selector.keys();

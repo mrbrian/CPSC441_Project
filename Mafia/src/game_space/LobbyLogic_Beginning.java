@@ -6,14 +6,14 @@ import game_space.ReadyRoom.State;
 import players.Player;
 import server.SelectServer;
 
-public class LobbyLogic_NotReady{
+public class LobbyLogic_Beginning implements LobbyLogic{
 		
 	private static final float COUNT_INTERVAL = 2;
 	private int count;
 	private float timer;
 	private ReadyRoom room;
 	
-	public LobbyLogic_NotReady(ReadyRoom r)
+	public LobbyLogic_Beginning(ReadyRoom r)
 	{
 		room = r;
 		count = 5;

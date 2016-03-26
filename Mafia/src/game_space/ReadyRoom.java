@@ -21,7 +21,7 @@ public class ReadyRoom{
 	}
 	
 	private SelectServer server;
-	private LobbyLogic_NotReady logic;
+	private LobbyLogic logic;
 	private State state;
 	private static final int NUM_PLAYERS_REQ = 2;
 	private String socket;
@@ -88,7 +88,7 @@ public class ReadyRoom{
 	}
 	
 	//done in the server?
-	public GameSpace beginGame(PlayerManager plyr_mgr){	
+	public GameSpace beginGame(){	
 		//make game space
 		game = new GameSpace(playerList);
 		return game;
@@ -101,9 +101,11 @@ public class ReadyRoom{
 		switch (ns)
 		{
 			case GameInProgress:
+				beginGame();
+				logic = new LobbyLogic_GameInProgress(this, game);
 				break;
 			case Beginning:
-				logic = new LobbyLogic_NotReady(this);
+				logic = new LobbyLogic_Beginning(this);
 				break;
 		}
 		
