@@ -145,11 +145,11 @@ public class SelectServer
 	    		username = new String(p.data, 2, usernameLength);
     			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));    			
     			
-    			if(!saveInfo.doesUsrExist(username)){
-    				System.out.println("Error Username Already Exists");
-    			}else{
+    			if(saveInfo.doesUsrExist(username) == false){
     				saveInfo.saveUserData(username, password); 
-    	    		sendMessage("Creating a new account..", ch); 				
+    	    		sendMessage("Creating a new account..", ch);
+    			}else{
+    				System.out.println("Error Username Already Exists");
     			}
     			
 	    		break;

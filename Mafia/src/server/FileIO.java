@@ -36,9 +36,13 @@ public class FileIO {
 		File file = new File("../Mafia/src/user_save.txt");
 		boolean doesExist = false;
 		
+		System.out.println("doesExist before try: " + doesExist);
+		
 		try {
 			Scanner scanner = new Scanner(file);
 			int lineNum = 0;
+			
+			System.out.println("doesExist in try: " + doesExist);
 			
 			while(scanner.hasNextLine()){
 				String currLine = scanner.nextLine();
@@ -55,6 +59,8 @@ public class FileIO {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		
+		System.out.println("doesExist after try: " + doesExist);
 		
 		return doesExist;
 	}
