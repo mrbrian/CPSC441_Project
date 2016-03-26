@@ -94,6 +94,15 @@ public class SelectServer
 		ReadyRoom room = room_mgr.findRoom(roomID);
 		GameSpace game = room.getGameSpace();
 		
+		
+		if(game == null){			
+			for(Player p : room.getPlayerList()){
+				sendMessage(msg, p.getChannel());
+			}
+			
+			return;
+		}
+		
 		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
 		for (int i = 0; i < listeners.size(); i++) {
@@ -192,6 +201,8 @@ public class SelectServer
 		    		ClientJoinPacket cjp = new ClientJoinPacket(p);
 		    		
 		    		ReadyRoom room = room_mgr.open(cjp.roomId);
+		    		System.out.println("roomId: " + cjp.roomId);
+		    		
 					room.joinRoom(player);	
 					int rmIdx = room.getId();
 		    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
@@ -199,12 +210,7 @@ public class SelectServer
 		    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
 	    		}
 	    		break;
-	    	case Chat:
-	    		String msg = new String(p.data, 0, p.dataSize);
-	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
-	    		sendMessageAll(showStr);
-	    		System.out.println(showStr);	    			
-	    		break;
+
 	    	case Logout:
 	    		int roomID = player.getRoomIndex();
 	    		
@@ -246,12 +252,20 @@ public class SelectServer
     void processRoomCommands(ClientPacket p, SocketChannel ch) throws IOException
     {
     	SocketAddress socketAddress = ch.getRemoteAddress();
+    	Player player = plyr_mgr.findPlayer(socketAddress);
     	
 		ServerPacket sp = room_mgr.processPacket(p, ch);
     	switch (p.type)
     	{	    	
     		case Vote:
     			break;
+	    	case Chat:
+	    		String msg = new String(p.data, 0, p.dataSize);
+	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+	    		//sendMessageAll(showStr);
+	    		sendMessageToGroup(showStr, player.getPlayer());
+	    		System.out.println(showStr);	    			
+	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
     			break;

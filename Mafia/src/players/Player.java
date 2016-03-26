@@ -132,5 +132,9 @@ public class Player {
 	public SocketChannel getChannel() {
 		return channel;
 	}
+	
+	public Player getPlayer(){
+		return this;
+	}
 
 }

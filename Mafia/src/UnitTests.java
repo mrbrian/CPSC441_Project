@@ -9,6 +9,7 @@ import client.ClientPacket;
 import game_space.ReadyRoom;
 import players.Player;
 import server.PlayerManager;
+import server.RoomManager;
 import server.ServerPacket;
 import server.ServerPacket.PacketType;
 
@@ -110,6 +111,56 @@ public class UnitTests {
 		room.update(20);
 		
 		boolean actual = room.getState() == ReadyRoom.State.GameInProgress;  		
+		
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void room_counter_test(){
+		int expected = 1;				
+		
+		RoomManager roomManager = new RoomManager(null);
+		roomManager.open(0);
+		
+		
+		ReadyRoom room = roomManager.findRoom(0);		
+
+		PlayerManager pmgr = new PlayerManager(null);
+		
+		// add 2 players
+		for (int i = 0; i < 2; i++)
+		{		
+			Player p = new Player(null);
+			p.setIPAddress("p" + i);
+			p.setPseudonym("p" + i);
+			pmgr.addPlayer(p);
+			room.joinRoom(p);			
+		}
+				
+		room.update(20);
+		
+		
+		
+		
+		roomManager.open(1);
+		
+		
+		ReadyRoom room2 = roomManager.findRoom(1);
+		int actual = 0;
+		
+		
+		// add 2 players
+		for (int i = 3; i < 5; i++)
+		{		
+			Player p = new Player(null);
+			p.setIPAddress("p" + i);
+			p.setPseudonym("p" + i);
+			pmgr.addPlayer(p);
+			room2.joinRoom(p);
+			
+			actual = p.getRoomIndex();
+		}
+		
 		
 		assertEquals(expected, actual);
 	}

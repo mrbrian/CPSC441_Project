@@ -83,6 +83,9 @@ class TCPClient implements Runnable {
 					break;
 				case "/join":
 					if (tokens.length >= 2) {
+						
+						System.out.println(tokens[1]);
+						
 						packet = ClientPacket.join(Integer.parseInt(tokens[1]));
 					} else {
 						System.out.println("error with join: must provide a room id");

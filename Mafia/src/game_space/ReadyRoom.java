@@ -23,7 +23,7 @@ public class ReadyRoom{
 	private SelectServer server;
 	private LobbyLogic_NotReady logic;
 	private State state;
-	private static final int NUM_PLAYERS_REQ = 1;
+	private static final int NUM_PLAYERS_REQ = 2;
 	private String socket;
 	
 	//playerList is 2-tuple string of (IP,pseudonym)
@@ -50,6 +50,17 @@ public class ReadyRoom{
 		//check if name and IP are unique
 		for (int i = 0; i < playerList.size(); i++) {
 			Player p = playerList.get(i);
+			
+			if(playerInfo[0] == null){
+				System.out.println("playerInfo[0] is null");
+			}
+			
+			if(playerInfo[1] == null){
+				System.out.println("playerinfo[1] is null");
+			}
+			
+			System.out.println("Player's state: " + player.getState());
+			
 			if (playerInfo[0].equals(p.getIPAddress()) || playerInfo[1].equals(p.getPseudonym()))
 				canAdd = false;
 		}

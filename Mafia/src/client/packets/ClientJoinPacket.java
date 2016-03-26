@@ -15,7 +15,7 @@ public class ClientJoinPacket extends ClientPacket {
 		bb.put(data);
 		bb.flip();
 		
-		int roomId = bb.getInt();		
+		roomId = bb.getInt();		
 	}
 }
 
