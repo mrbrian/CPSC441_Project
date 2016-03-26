@@ -14,8 +14,26 @@ import java.nio.ByteBuffer;
 
 import server.ServerPacket; 
 
-class TCPClient { 
+class TCPClient implements Runnable {
+	
+	Thread thread;
+	boolean terminate;
+    Socket clientSocket; 
+    
+    public TCPClient (String args[]){
 
+        // Initialize a client socket connection to the server
+        try
+        {
+        	clientSocket = new Socket(args[0], Integer.parseInt(args[1]));        
+        }
+        catch (IOException e)
+        {
+        	System.out.println(String.format("Could not initialize socket: %s", e.getMessage()));
+        	System.exit(1);
+        }       	                 
+    }
+    
 	public static void processPacket(ServerPacket p)
 	{		
 		switch (p.pType)
@@ -32,6 +50,9 @@ class TCPClient {
 		String[] tokens = input.split(delims);
 		ClientPacket packet = null;
 		
+		if (input.isEmpty())
+			return;
+		
 		if (tokens.length > 0 && tokens[0].length() > 0 && tokens[0].charAt(0) == '/') { //is a command
 			String command = tokens[0];
 			
@@ -44,7 +65,7 @@ class TCPClient {
 					}
 					break;
 				case "/login":	
-					if (tokens[1] != null && tokens[2] != null) {
+					if (tokens.length >= 3 && tokens[1] != null && tokens[2] != null) {
 						packet = ClientPacket.loginPacket(tokens[1],tokens[2]);
 					} else {
 						System.out.println("error with login: must provide a username and password");
@@ -113,34 +134,27 @@ class TCPClient {
     	buf.get(bytes);
     	outBuffer.write(bytes);  		
 	}
-	
-    public static void main(String args[]) throws Exception 
-    { 
-        if (args.length != 2)
+    
+    public void startInputThread ()
+    {
+        if (thread == null)
         {
-            System.out.println("Usage: TCPClient <Server IP> <Server Port>");
-            System.exit(1);
+      	  thread = new Thread(this, "TCPClientInput");
+      	  thread.start();
         }
-        
+    }
+    
+    public void update() throws Exception 
+    { 
         try
         {
-            // Initialize a client socket connection to the server
-            Socket clientSocket = new Socket(args[0], Integer.parseInt(args[1])); 
-            
-	        // Initialize input and an output stream for the connection(s)
-	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
-	        //BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));         
-	        DataInputStream inData = new DataInputStream(clientSocket.getInputStream());
-	 
-	        // Initialize user input stream
-	        String line = ""; 
-	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
-
-	        // expect a welcome packet from server.
+        	DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
+        	DataInputStream inData = new DataInputStream(clientSocket.getInputStream()); 
 	        
-	        int isDataAvailable = 0;
-	        	        
-	        while (!line.equals("logout"))
+        	// expect a welcome packet from server.	       
+            int isDataAvailable = 0;
+            
+	        while (!terminate)
 	        {   
 		        // check for data  
 	        	isDataAvailable = inData.available();	
@@ -153,13 +167,7 @@ class TCPClient {
 		        	ServerPacket p = ServerPacket.read(inData);
 		        	processPacket(p); // process data	       
 		        	isDataAvailable = inData.available();		        	
-		        }
-		        
-	            System.out.print("Please enter a message to be sent to the server ('logout' to terminate): ");
-
-	            // Get user input and parse command
-	            line = inFromUser.readLine(); 
-	            parseCommand(line, outBuffer);
+		        }		        
 	        }
 	        
 	        // Close the socket
@@ -169,5 +177,43 @@ class TCPClient {
         {
         	System.out.println(e);
         }       
-    } 
+    }
+
+	@Override
+	public void run() {
+		String line = "";
+
+		try
+		{	        
+			// Initialize input and an output stream for the connection(s)
+	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
+	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
+	
+	        while (!line.equals("logout"))
+	        {
+		        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
+		        line = inFromUser.readLine();
+		         
+		        if (!line.isEmpty()) 
+		        	parseCommand(line, outBuffer);
+	        }
+        }
+		catch (IOException e)
+		{
+			System.out.println(String.format("error run: %s", e.getMessage()));
+		}
+	} 
+	
+    public static void main(String args[]) throws Exception 
+    { 
+        if (args.length != 2)
+        {
+            System.out.println("Usage: TCPClient <Server IP> <Server Port>");
+            System.exit(1);
+        }
+        
+        TCPClient client = new TCPClient(args);
+        client.startInputThread();
+        client.update();
+    }
 } 
