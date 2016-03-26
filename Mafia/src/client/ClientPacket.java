@@ -83,7 +83,7 @@ public class ClientPacket {
 	 * and add an extra parameter to indicate what type of event it is
 	 * */
 	public static ClientPacket logout(){
-		return new ClientPacket(PacketType.Logout, null);
+		return new ClientPacket(PacketType.Logout, new byte[0]);
 	}
 	
 	public static ClientPacket setAlias(String alias){
@@ -108,11 +108,11 @@ public class ClientPacket {
 	}
 	
 	public static ClientPacket listUser(){
-		return new ClientPacket(PacketType.ListUsers, null);
+		return new ClientPacket(PacketType.ListUsers, new byte[0]);
 	}
 	
 	public static ClientPacket listRoom(){
-		return new ClientPacket(PacketType.ListRooms, null);
+		return new ClientPacket(PacketType.ListRooms, new byte[0]);
 	}
 	
 	public static ClientPacket chat(String msg){
@@ -124,7 +124,7 @@ public class ClientPacket {
 	}
 	
 	public static ClientPacket getGameStatus(){
-		return new ClientPacket(PacketType.GetGameStatus, null);
+		return new ClientPacket(PacketType.GetGameStatus, new byte[0]);
 	}
 
 	

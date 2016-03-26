@@ -22,7 +22,7 @@ public class Player {
 	private PlayerTypes.PlayerType playerType;
 	
 	private PlayerState state;
-	private int roomIndex;
+	private int roomIndex;  
 	private boolean isAlive;
 	/*
 	 *	Client initiates	 

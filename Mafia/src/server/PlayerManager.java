@@ -41,4 +41,8 @@ public class PlayerManager implements Iterable<Player>
     {
     	return players.iterator();
     }
+    
+    public void removePlayer(Player p) {
+    	players.remove(p);
+    }
 }

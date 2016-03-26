@@ -142,4 +142,16 @@ public class GameSpace{
 		return listeners;
 	}
 	
+	public ArrayList<Player> getPlayers() {
+		return players;
+	}
+	
+	public ArrayList<Player> getInnocent() {
+		return innocent;
+	}
+	
+	public ArrayList<Player> getMafioso() {
+		return mafioso;
+	}
+	
 }
