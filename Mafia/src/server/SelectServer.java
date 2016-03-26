@@ -12,6 +12,8 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 
+import com.sun.xml.internal.ws.developer.MemberSubmissionEndpointReference.Elements;
+
 import client.ClientPacket;
 import client.packets.*;
 import game_space.GameSpace;
@@ -166,7 +168,8 @@ public class SelectServer
     				sendMessage("Access Denied!", ch);
     			}
     			
-	    		break;	
+	    		break;		    		
+	    		
 			default:
 	    		sendMessage("Log in first!", ch);
 				break;
@@ -222,6 +225,19 @@ public class SelectServer
 	    		//now remove player from the player manager
 	    		plyr_mgr.removePlayer(player);
 	    		player.getChannel().socket().close();
+	    		break;
+	    		
+	    	case ListUsers:
+	    		
+	    		Iterator<Player> playerList = plyr_mgr.iterator();
+	    		
+	    		while(playerList.hasNext()){
+	    			String element = playerList.next().getUsername().toString();
+	    			System.out.println(element);
+		    		sendMessage(element, ch);
+	    		}
+	    		
+	    		
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
