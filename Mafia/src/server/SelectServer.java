@@ -217,12 +217,7 @@ public class SelectServer
 	    		if (roomID != -1) {  //then in a game
 	    			ReadyRoom room = room_mgr.findRoom(roomID);
 	    			GameSpace game = room.getGameSpace();
-	    			game.getPlayers().remove(player);
-	    			if (player.getPlayerType() == PlayerType.INNO) { //player is an innocent
-	    				game.getInnocent().remove(player);
-	    			} else { //player is a mafioso
-	    				game.getMafioso().remove(player);
-	    			}
+	    			game.removePlayer(player);	    			
 	    		}
 	    		
 	    		//now remove player from the player manager
