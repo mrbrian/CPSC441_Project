@@ -40,6 +40,7 @@ public class SelectServer
     ByteBuffer inBuffer;
     CharBuffer cBuffer;
     Selector selector;
+    FileIO saveInfo;
     int port;
     
 	public SelectServer(int port) 
@@ -63,6 +64,7 @@ public class SelectServer
 
 	        // Register that the server selector is interested in connection requests
 	        tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+	        saveInfo = new FileIO();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			System.exit(1);
@@ -133,6 +135,7 @@ public class SelectServer
     	
     	switch (p.type)
 		{
+    		// Gets new username and password and stores in "save_file"
 			case CreateAccount:
 	    		bb = ByteBuffer.allocate(2);
 	    		bb.put(p.data[0]);
@@ -140,15 +143,13 @@ public class SelectServer
 	    		short usernameLength = bb.getShort(0);
 	    		
 	    		username = new String(p.data, 2, usernameLength);
-    			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));
-    			
-    			FileIO saveInfo = new FileIO();
+    			password = new String(p.data, 2 + usernameLength + 2, p.dataSize - (2 + usernameLength + 2));    			
     			
     			if(!saveInfo.doesUsrExist(username)){
-    				saveInfo.saveUserData(username, password);
+    				System.out.println("Error Username Already Exists");
     			}else{
-    				System.out.println("Username already exists !");   
-    	    		sendMessage("Username already exists!", ch); 				
+    				saveInfo.saveUserData(username, password); 
+    	    		sendMessage("Creating a new account..", ch); 				
     			}
     			
 	    		break;
@@ -156,12 +157,15 @@ public class SelectServer
 	    		ClientLoginPacket clp = new ClientLoginPacket(p);	    		
 	    		// update player info		
     			player.setUsername(clp.username);
-    			player.setState(PlayerState.Logged_In);
     			
-	    		plyr_mgr.addPlayer(player);	// if valid auth details given
-	    		System.out.println(String.format("Login [%s]", player.getUsername()));
-	    		
-	    		sendMessage(String.format("Logged in successfully as: %s", clp.username), ch);
+    			if(saveInfo.checkCredentials(clp.username, clp.password)){
+    				player.setState(PlayerState.Logged_In);
+        			System.out.println(String.format("Login [%s]", player.getUsername()));
+    	    		sendMessage(String.format("Access Granted!\n Logged in successfully as: %s", clp.username), ch);    	    		
+    			}else{
+    				sendMessage("Access Denied!", ch);
+    			}
+    			
 	    		break;	
 			default:
 	    		sendMessage("Log in first!", ch);
@@ -304,7 +308,7 @@ public class SelectServer
                         cchannel.register(selector, SelectionKey.OP_READ);
                         
                         Player plyr = new Player(cchannel);
-        	    		plyr_mgr.addPlayer(plyr);	// if valid auth details given
+        	    		plyr_mgr.addPlayer(plyr);	
         	    		
                         sendMessage("Welcome", cchannel);                    
                         //sendPacket(p, cchannel); 
