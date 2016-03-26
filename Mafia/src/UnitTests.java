@@ -1,11 +1,16 @@
 import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
+import java.util.Date;
+
 import org.junit.Test;
 
-import clients.ClientPacket;
-import networks.ServerPacket;
-import networks.ServerPacket.PacketType;
+import client.ClientPacket;
+import game_space.ReadyRoom;
+import players.Player;
+import server.PlayerManager;
+import server.ServerPacket;
+import server.ServerPacket.PacketType;
 
 public class UnitTests {
 
@@ -62,7 +67,7 @@ public class UnitTests {
 		if (expected.equals(actual))
 			fail("non match");
 	}
-	
+
 	@Test
 	public void clientPacket_readWrite_Test1_Pass(){
 		ClientPacket clientPacket = new ClientPacket(
@@ -81,5 +86,31 @@ public class UnitTests {
 		if(!expected.equals(actual)){
 			fail("non match");
 		}
+	}
+	
+	@Test
+	public void readyRoom_ReadyTest1(){
+		
+		boolean expected = true;				
+		
+		ReadyRoom room = new ReadyRoom(null, 0);
+
+		PlayerManager pmgr = new PlayerManager(null);
+		
+		// add 8 players
+		for (int i = 0; i < 8; i++)
+		{
+			Player p = new Player(null);
+			p.setIPAddress("p" + i);
+			p.setPseudonym("p" + i);
+			pmgr.addPlayer(p);
+			room.joinRoom(p);			
+		}
+				
+		room.update(20);
+		
+		boolean actual = room.getState() == ReadyRoom.State.GameInProgress;  		
+		
+		assertEquals(expected, actual);
 	}
 }

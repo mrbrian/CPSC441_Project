@@ -1,4 +1,4 @@
-package networks;
+package server;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -17,7 +17,8 @@ public class ServerPacket
 		ListRooms,
 		Acknowledge,
 		StatusChange,
-		BanUser
+		BanUser,
+		Disconnect
 	}
 	
 	public PacketType pType;
@@ -117,7 +118,7 @@ public class ServerPacket
 	
 	public static ServerPacket buildServerMessagePacket(String msg) {
 		
-		byte[] data = null;
+		byte[] data = {};
 		ServerPacket packet = new ServerPacket(PacketType.ServerMessage, msg, data);
 		return packet;
 	}

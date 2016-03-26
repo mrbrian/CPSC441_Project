@@ -1,4 +1,4 @@
-package clients;
+package players;
 
 public class PlayerTypes {
 	

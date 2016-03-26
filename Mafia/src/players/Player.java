@@ -1,21 +1,29 @@
-package clients;
+package players;
 
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
 public class Player {
 
+	public enum PlayerState
+	{		
+		Not_Logged_In,
+		Logged_In,
+		In_Room,
+		Reconnect_Waiting
+	}
+	
 	private String username;
 	private String pseudonym;
 	
 	private String IPAddress;
 	private String portNumber;
-	
+	private SocketChannel channel;
 	private PlayerTypes.PlayerType playerType;
 	
-	private int roomIndex;
+	private PlayerState state;
+	private int roomIndex;  
 	private boolean isAlive;
-	private ArrayList<String> votedWho;	
-	
 	/*
 	 *	Client initiates	 
 	 * 		- Reply from server
@@ -32,13 +40,24 @@ public class Player {
 	 * 
 	 * 
 	 * */
-	
-	
-	
-	public Player(){
+		
+	public Player(SocketChannel sc){
+		
+		channel = sc;
+		
+		try
+		{
+			this.IPAddress = sc.getRemoteAddress().toString();
+		}
+		catch (Exception e)
+		{
+			this.IPAddress = String.format("invalid player ipaddress: %s", e.getMessage());
+		}
+		
+		state = PlayerState.Not_Logged_In;
 		roomIndex = -1;
 		isAlive = false;
-		votedWho = new ArrayList<>();
+		new ArrayList<>();
 		playerType = null;
 	}
 	
@@ -49,13 +68,13 @@ public class Player {
 	public PlayerTypes.PlayerType getPlayerType(){
 		return playerType;
 	}
-	
-	public void setIPAddress(String IPAddress){
-		this.IPAddress = IPAddress;
-	}
-	
+
 	public String getIPAddress(){
 		return IPAddress;
+	}
+	
+	public void setIPAddress(String s){
+		IPAddress = s;
 	}
 	
 	public void setPortNumber(String portNumber){
@@ -84,7 +103,7 @@ public class Player {
 		this.roomIndex = v;
 	}
 	
-	public int getRoomIndex(int v){
+	public int getRoomIndex(){
 		return this.roomIndex;
 	}
 
@@ -94,5 +113,24 @@ public class Player {
 
 	public void setUsername(String u) {
 		username = u;
-	}	
+	}
+	
+	public void setState(PlayerState s)
+	{
+		state = s;
+	}
+
+	public PlayerState getState()
+	{
+		return state;
+	}
+
+	public Object getUsername() {
+		return username;
+	}
+
+	public SocketChannel getChannel() {
+		return channel;
+	}
+
 }

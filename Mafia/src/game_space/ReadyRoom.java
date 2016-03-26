@@ -1,48 +1,67 @@
 package game_space;
 
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 
-import clients.Player;
+import game_space.ReadyRoom.State;
+import players.Player;
+import server.PlayerManager;
+import server.SelectServer;
 
 public class ReadyRoom{
+
+	public enum State
+	{
+		NotReady,
+		Beginning,
+		GameInProgress,
+		GameOver
+	}
 	
+	private SelectServer server;
+	private LobbyLogic_NotReady logic;
+	private State state;
+	private static final int NUM_PLAYERS_REQ = 1;
 	private String socket;
 	
-	//playerList is 2-tuple string of (IP,playerName)
-	private ArrayList<String[]> playerList;
-	private boolean allReady;
+	//playerList is 2-tuple string of (IP,pseudonym)
+	private ArrayList<Player> playerList;
 	private GameSpace game;
 	private int id;
+	private boolean allReady;
 	
-	public ReadyRoom(int id){
+	public ReadyRoom(SelectServer s, int id){
 		this.id = id;
-		playerList = new ArrayList<String[]>();
+		server = s;
+		playerList = new ArrayList<Player>();
+		state = State.NotReady;
 	}
 
 	public int getId(){
 		return id;
 	}
 	
-	public boolean joinRoom(String IP, String playerName) {
-		String[] playerInfo = {IP, playerName};
+	public boolean joinRoom(Player player) {
+		String[] playerInfo = {player.getIPAddress(), player.getPseudonym()};
 		boolean canAdd = true;
 		
 		//check if name and IP are unique
 		for (int i = 0; i < playerList.size(); i++) {
-			if (IP.equals(playerList.get(i)[0]) || playerName.equals(playerList.get(i)[1]));
+			Player p = playerList.get(i);
+			if (playerInfo[0].equals(p.getIPAddress()) || playerInfo[1].equals(p.getPseudonym()))
 				canAdd = false;
 		}
 		//add player to list
 		if (canAdd) {
-			playerList.add(playerInfo);
+			playerList.add(player);
 			return true;
 		} else {
 			return false;
-		}		
-	}
+		}		 
+	}	
 	
-	
-	public ArrayList<String[]> getPlayerList() {
+	public ArrayList<Player> getPlayerList() {
 		return playerList;
 	}
 	
@@ -55,21 +74,48 @@ public class ReadyRoom{
 	}
 	
 	//done in the server?
-	public GameSpace beginGame(){
-		//create player objects
-		ArrayList<Player> players = new ArrayList<Player>();
+	public GameSpace beginGame(PlayerManager plyr_mgr){	
+		//make game space
+		game = new GameSpace(playerList);
+		return game;
+	}	
+	
+	public void changeState(State ns)
+	{
+		logic = null;
 		
-		Player p;
-		
-		//create players for game
-		for (int i = 0; i < playerList.size(); i++) {
-			p = new Player();
-			p.setIPAddress(playerList.get(i)[0]);
-			players.add(p);
+		switch (ns)
+		{
+			case GameInProgress:
+				break;
+			case Beginning:
+				logic = new LobbyLogic_NotReady(this);
+				break;
 		}
 		
-		//make game space
-		game = new GameSpace(players);
-		return game;
+		state = ns;		
+	}
+	
+	public void update(float elapsedTime) {
+		
+		if (state == State.NotReady && playerList.size() == NUM_PLAYERS_REQ)
+			changeState(State.Beginning);
+		
+		if (logic != null)
+			logic.update(elapsedTime);
+	}
+
+	public void sendMessageRoom(String msg) {
+		for (Player p : playerList)
+		{		
+			if (server == null)
+				System.out.println("sendMessageRoom warning: server == null");
+			else
+				server.sendMessage(msg, p.getChannel());
+		}
+	}
+
+	public State getState() {
+		return state;
 	}
 }

@@ -1,4 +1,4 @@
-package clients;
+package client;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -83,15 +83,24 @@ public class ClientPacket {
 	 * and add an extra parameter to indicate what type of event it is
 	 * */
 	public static ClientPacket logout(){
-		return new ClientPacket(PacketType.Logout, null);
+		return new ClientPacket(PacketType.Logout, new byte[0]);
 	}
 	
 	public static ClientPacket setAlias(String alias){
 		return new ClientPacket(PacketType.SetAlias, alias.getBytes());
 	}
 	
-	public static ClientPacket join(String roomId){
-		return new ClientPacket(PacketType.Join, roomId.getBytes());
+	public static ClientPacket join(int roomId){
+		int totalSize = 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putInt(roomId);
+		buffer.flip();
+		
+		byte[] data = new byte[totalSize];
+		buffer.get(data);
+		
+		return new ClientPacket(PacketType.Join, data);
 	}
 	
 	public static ClientPacket invite(String username){
@@ -99,11 +108,11 @@ public class ClientPacket {
 	}
 	
 	public static ClientPacket listUser(){
-		return new ClientPacket(PacketType.ListUsers, null);
+		return new ClientPacket(PacketType.ListUsers, new byte[0]);
 	}
 	
 	public static ClientPacket listRoom(){
-		return new ClientPacket(PacketType.ListRooms, null);
+		return new ClientPacket(PacketType.ListRooms, new byte[0]);
 	}
 	
 	public static ClientPacket chat(String msg){
@@ -115,7 +124,7 @@ public class ClientPacket {
 	}
 	
 	public static ClientPacket getGameStatus(){
-		return new ClientPacket(PacketType.GetGameStatus, null);
+		return new ClientPacket(PacketType.GetGameStatus, new byte[0]);
 	}
 
 	

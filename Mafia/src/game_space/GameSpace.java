@@ -1,10 +1,11 @@
 package game_space;
 
 import java.util.Random;
+
+import players.Player;
+
 import java.util.ArrayList;
 import java.util.Random;
-
-import clients.Player;
 
 public class GameSpace{
 	private Random randGen;
@@ -24,6 +25,7 @@ public class GameSpace{
 	private gameState currentState;
 	
 	public GameSpace(ArrayList<Player> connected) {
+		randGen = new Random();
 		players = connected;
 		currentState = gameState.DAY;
 		assignTeams();
@@ -138,6 +140,18 @@ public class GameSpace{
 		
 		listeners.remove(speaker);
 		return listeners;
+	}
+	
+	public ArrayList<Player> getPlayers() {
+		return players;
+	}
+	
+	public ArrayList<Player> getInnocent() {
+		return innocent;
+	}
+	
+	public ArrayList<Player> getMafioso() {
+		return mafioso;
 	}
 	
 }
