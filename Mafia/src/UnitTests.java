@@ -93,22 +93,18 @@ public class UnitTests {
 		
 		ReadyRoom room = new ReadyRoom(0);
 
-		PlayerManager pm = new PlayerManager();
+		PlayerManager pmgr = new PlayerManager();
 		
 		// add 8 players
 		for (int i = 0; i < 8; i++)
 		{
 			Player p = new Player(null);
-			pm.addPlayer(p);
-			room.joinRoom("", "p" + i);
+			pmgr.addPlayer(p);
+			room.joinRoom("" + i, "p" + i);			
 		}
-		
-		//room.beginGame(pm);
-		
+				
 		boolean actual = room.gameIsReady(); 		
 		
-		if(!expected == actual){
-			fail("non match");
-		}
+		assertEquals(expected, actual);
 	}
 }

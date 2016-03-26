@@ -19,7 +19,8 @@ public class PlayerManager implements Iterable<Player>
 	
 	public void addPlayer(Player p)
 	{
-		players.add(p);
+		if (!players.contains(p))
+			players.add(p);
 	}
 
     public Player findPlayer(SocketAddress socketAddress)

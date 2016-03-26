@@ -1,6 +1,5 @@
 package players;
 
-import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
@@ -100,7 +99,7 @@ public class Player {
 		this.roomIndex = v;
 	}
 	
-	public int getRoomIndex(int v){
+	public int getRoomIndex(){
 		return this.roomIndex;
 	}
 
@@ -128,5 +127,6 @@ public class Player {
 
 	public SocketChannel getChannel() {
 		return channel;
-	}	
+	}
+
 }

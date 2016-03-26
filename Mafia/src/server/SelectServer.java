@@ -14,6 +14,7 @@ import java.util.*;
 
 import client.ClientPacket;
 import client.packets.*;
+import game_space.ReadyRoom;
 import players.Player;
 import players.Player.PlayerState;
 import server.FileIO;
@@ -31,29 +32,34 @@ public class SelectServer
     Selector selector;
     int port;
     
-	SelectServer(int port) throws IOException
+	public SelectServer(int port) 
 	{
 		this.port = port;
 		
 		room_mgr = new RoomManager();
 		plyr_mgr = new PlayerManager();
-		        
-        // Initialize the selector
-        selector = Selector.open();
+		   
+		try {
+	        // Initialize the selector
+	        selector = Selector.open();
 
-        // Create a server channel and make it non-blocking
-        tcp_channel = ServerSocketChannel.open();
-        tcp_channel.configureBlocking(false);
-       
-        // Get the port number and bind the socket
-        InetSocketAddress isa = new InetSocketAddress(port);
-        tcp_channel.socket().bind(isa);
+	        // Create a server channel and make it non-blocking
+	        tcp_channel = ServerSocketChannel.open();
+	        tcp_channel.configureBlocking(false);
+	       
+	        // Get the port number and bind the socket
+	        InetSocketAddress isa = new InetSocketAddress(port);
+	        tcp_channel.socket().bind(isa);
 
-        // Register that the server selector is interested in connection requests
-        tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+	        // Register that the server selector is interested in connection requests
+	        tcp_channel.register(selector, SelectionKey.OP_ACCEPT);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			System.exit(1);
+		}
 	}
 
-	void sendMessageAll(String msg, SocketChannel ch) throws IOException
+	void sendMessageAll(String msg) 
 	{
         Iterator<Player> playerItr = plyr_mgr.iterator();
 
@@ -72,12 +78,19 @@ public class SelectServer
 		sendPacket(p, ch);
 	}
 	
-    void sendPacket(ServerPacket p, SocketChannel ch) throws IOException
+    void sendPacket(ServerPacket p, SocketChannel ch) 
     {
+    	try
+    	{
     	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
     	p.write(inBuffer);
     	inBuffer.rewind();
-    	ch.write(inBuffer);    	
+    	ch.write(inBuffer);
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println(String.format("sendPacket error: %s", e.getMessage()));
+    	}
     }    
     
     void processUnrestrictedCommands(ClientPacket p, SocketChannel ch) throws IOException
@@ -149,11 +162,13 @@ public class SelectServer
 	    		player.setRoomIndex(rmIdx);
 	    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
 
-	    		sendMessage(String.format("Joined room #: %d", rmIdx), ch);
+	    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
 	    		break;
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);
-	    		System.out.println(String.format("Chat [%s]: %s", player.getUsername(), msg));	    			
+	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+	    		sendMessageAll(showStr);
+	    		System.out.println(showStr);	    			
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
@@ -166,10 +181,11 @@ public class SelectServer
     {
     	SocketAddress socketAddress = ch.getRemoteAddress();
     	
-    	Player player = plyr_mgr.findPlayer(socketAddress);
-    	
+		ServerPacket sp = room_mgr.processPacket(p, ch);
     	switch (p.type)
     	{	    	
+    		case Vote:
+    			break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
     			break;
@@ -216,8 +232,8 @@ public class SelectServer
                 }
                 
                 // Get set of ready sockets
-                Set readyKeys = selector.selectedKeys();
-                Iterator readyItor = readyKeys.iterator();
+                Set<SelectionKey> readyKeys = selector.selectedKeys();
+                Iterator<SelectionKey> readyItor = readyKeys.iterator();
 
                 // Walk through the ready set
                 while (readyItor.hasNext()) 
@@ -283,7 +299,7 @@ public class SelectServer
         }
  
         // close all connections
-        Set keys = selector.keys();
+        Set<SelectionKey> keys = selector.keys();
         Iterator<SelectionKey> itr = keys.iterator();
         while (itr.hasNext()) 
         {
