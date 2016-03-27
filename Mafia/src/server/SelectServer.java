@@ -158,7 +158,7 @@ public class SelectServer
     			player.setUsername(clp.username);
     			
     			if(saveInfo.checkCredentials(clp.username, clp.password)){
-    				player.setState(PlayerState.Logged_In);
+    				plyr_mgr.login(player);
         			System.out.println(String.format("Login [%s]", player.getUsername()));
     	    		sendMessage(String.format("Access Granted!\n Logged in successfully as: %s", clp.username), ch);    	    		
     			}else{
@@ -364,7 +364,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	                        sendMessage("Welcome", cchannel);                    
+	                        sendMessage("Welcome!", cchannel);                    
 	                    } 
 	                    else 
 	                    {
