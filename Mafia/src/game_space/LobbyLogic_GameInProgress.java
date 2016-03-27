@@ -1,6 +1,7 @@
 package game_space;
 
 import game_space.ReadyRoom.State;
+import java.util.Date;
 
 public class LobbyLogic_GameInProgress implements LobbyLogic{
 	
@@ -9,6 +10,9 @@ public class LobbyLogic_GameInProgress implements LobbyLogic{
 	private ReadyRoom room;
 	private float timer;
 	private int turn_num;
+	private Date currTime;
+	private int oldState;
+	private int currState;
 	
 //State
 	public LobbyLogic_GameInProgress(ReadyRoom r, GameSpace g)
@@ -20,20 +24,14 @@ public class LobbyLogic_GameInProgress implements LobbyLogic{
 	public void update(float elapsedTime)
 	{
 		timer += elapsedTime;
-
-		while (timer <= 0 && turn_num >= 0)
-		{			
-			// send to all people in the room
-			if (turn_num > 0)
-				room.sendMessageRoom(String.format("Beginning turn #%d..", turn_num));
-			timer += TURN_INTERVAL;
-			turn_num--; 
+		currTime = new Date();
+		currState = game.updateState(currTime.getTime());
+		if (currState == 1) {
+			room.sendMessageRoom(String.format("******A new day begins...******"));
 		}
-		
-		//if (count == -1)
-		{
-			room.sendMessageRoom("Game is finished!");
-			room.changeState(State.GameOver);
-		}	
+		else if (currState == 0) {
+			room.sendMessageRoom(String.format("~~~~~~Night descends...~~~~~~~"));	
+		}
+	
 	}
 }

@@ -23,7 +23,7 @@ public class ReadyRoom{
 	private SelectServer server;
 	private LobbyLogic logic;
 	private State state;
-	private static final int NUM_PLAYERS_REQ = 2;
+	private static final int NUM_PLAYERS_REQ = 1;
 	private String socket;
 	
 	//playerList is 2-tuple string of (IP,pseudonym)
