@@ -9,8 +9,7 @@ public class Player {
 	{		
 		Not_Logged_In,
 		Logged_In,
-		In_Room,
-		Reconnect_Waiting
+		In_Room			
 	}
 	
 	private String username;
@@ -59,7 +58,7 @@ public class Player {
 		isAlive = false;
 		new ArrayList<>();
 		playerType = null;
-		username = "NOT LOGGED IN";
+		username = "NOT_LOGGED_IN";
 	}
 	
 	public void setPlayerType(PlayerTypes.PlayerType playerType){
@@ -138,4 +137,7 @@ public class Player {
 		return this;
 	}
 
+	public void setSocketChannel(SocketChannel ch) {
+		channel = ch;
+	}	
 }

@@ -6,6 +6,8 @@ import java.util.Date;
 
 import client.ClientPacket;
 import game_space.ReadyRoom;
+import players.Player;
+import players.Player.PlayerState;
 
 public class RoomManager implements Runnable{
 
@@ -104,6 +106,5 @@ public class RoomManager implements Runnable{
 				e.printStackTrace();
 			}
 		}
-	}
-	
+	}	
 }
