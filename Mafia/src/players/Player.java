@@ -1,5 +1,6 @@
 package players;
 
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
@@ -132,12 +133,39 @@ public class Player {
 	public SocketChannel getChannel() {
 		return channel;
 	}
-	
+
 	public Player getPlayer(){
 		return this;
+	}
+	
+	public boolean isConnected(){
+		return (channel != null);
 	}
 
 	public void setSocketChannel(SocketChannel ch) {
 		channel = ch;
+		if (ch == null)
+			return;
+		try{
+			setIPAddress(ch.getRemoteAddress().toString());
+		}
+		catch(IOException e)
+		{
+			setIPAddress("NOT VALID: " + e.getMessage());
+		}
 	}	
+	
+	public String stateString(){
+		String result = String.format("Username: %s\nPseudonym: %s\nIP addr: %s\nPort: %d\nChannel: %s\nPlayerType: %s\nState: %s\nRoomIndex: %d\nisAlive: %s\n",
+				username,
+				pseudonym,
+				IPAddress, 
+				portNumber,
+				channel,
+				playerType,
+				state,
+				roomIndex,
+				isAlive);	
+		return result;
+	}
 }

@@ -108,7 +108,10 @@ public class SelectServer
     void sendPacket(ServerPacket p, SocketChannel ch) 
     {
     	if (ch == null)
+    	{
     		System.out.println(String.format("sendPacket warning (ch == null): %s ", p.msg));
+    		return;
+    	}
     	try
     	{
 	    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
@@ -166,7 +169,10 @@ public class SelectServer
     			}
     			
 	    		break;		    		
-	    		
+
+	    	case ShowState:
+	    		sendMessage(player.stateString(), ch);
+	    		break;
 			default:
 	    		sendMessage("Log in first!", ch);
 				break;
@@ -188,7 +194,6 @@ public class SelectServer
 	    	
 	    	case Join:
 	    		{
-	    			
 	    			//make sure player has a pseudonym before they can use join
 	    			if (player.getPseudonym() != null) {
 	    			
@@ -249,7 +254,7 @@ public class SelectServer
 	    		plyr_mgr.removePlayer(player);
 	    		player.getChannel().socket().close();
 	    		break;
-	    		
+
 	    	case ListUsers:
 	    		
 	    		Iterator<Player> playerList = plyr_mgr.iterator();
@@ -258,9 +263,11 @@ public class SelectServer
 	    			String element = playerList.next().getUsername().toString();
 	    			System.out.println(element);
 		    		sendMessage(element, ch);
-	    		}
+	    		}   		
 	    		
-	    		
+	    		break;
+	    	case ShowState:
+	    		sendMessage(player.stateString(), ch);
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
@@ -284,6 +291,9 @@ public class SelectServer
 	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
 	    		sendMessageToGroup(showStr, player.getPlayer());
 	    		System.out.println(showStr);	    			
+	    		break;
+	    	case ShowState:
+	    		sendMessage(player.stateString(), ch);
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
@@ -379,16 +389,26 @@ public class SelectServer
 	                          
 	                            Thread.sleep(100);		
 	
-	                            // Read from socket
-	                            int bytesRecv = cchannel.read(inBuffer);
-	                            if (bytesRecv <= 0)
+	                        	Player p = plyr_mgr.findPlayer(cchannel.getRemoteAddress());	                            
+	                            try 
 	                            {
-	                            	Player p = plyr_mgr.findPlayer(cchannel.getRemoteAddress());
-	                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));
-	                                key.cancel();  // deregister the socket
-	                                continue;
+		                            // Read from socket
+	                            	int bytesRecv = cchannel.read(inBuffer);
+		                            if (bytesRecv <= 0)
+		                            {
+		                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));		                                
+		                            	plyr_mgr.disconnect(p);
+		                                key.cancel();  // deregister the socket
+		                                continue;
+		                            }
 	                            }
-	                             
+	                            catch(Exception e)
+	                            {
+	                            	plyr_mgr.disconnect(p);
+	                                System.out.println("Canceling..");
+	                                
+	                                key.cancel();  // deregister the socket	                            	
+	                            }	                             
 	                            inBuffer.flip();      // make buffer available  
 	                            
 	                            while (inBuffer.hasRemaining())

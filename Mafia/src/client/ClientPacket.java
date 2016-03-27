@@ -18,7 +18,8 @@ public class ClientPacket {
 		Chat,
 		Vote,
 		GetGameStatus,
-		CreateRoom
+		CreateRoom,
+		ShowState
 	}
 	
 	public PacketType type;

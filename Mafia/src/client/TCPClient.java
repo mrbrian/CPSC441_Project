@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 
+import client.ClientPacket.PacketType;
 import server.ServerPacket; 
 
 class TCPClient implements Runnable {
@@ -123,6 +124,9 @@ class TCPClient implements Runnable {
 					} else {
 						System.out.println("error with join: must provide a room id");
 					}
+					break;
+				case "/showstate":
+					packet = new ClientPacket(PacketType.ShowState, new byte[]{});
 					break;
 				default:
 					System.out.println("Not a vaild command");

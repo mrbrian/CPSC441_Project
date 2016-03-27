@@ -45,36 +45,40 @@ public class PlayerManager implements Iterable<Player>
     {
     	return players.iterator();
     }
-    
+
     public void removePlayer(Player p) {
     	players.remove(p);
     }
 
+    public void disconnect(Player p) {
+    	if (p != null)
+    		p.setSocketChannel(null);	// set to null to show they disconnected
+    	
+    	// to do: have a time limit they can be disconnected before they are removed from the player list?
+    }
+
 	public void login(Player player) 
 	{
+		Player prevLogin = null;
 		boolean reconnecting = false;
 		// check if its a reconnect
 		for (Player p : players)
 		{
-			if (player != p && player.getUsername().equals(p.getUsername()))
+			if (player == p)
+				continue;
+			if (player.getUsername().equals(p.getUsername()) && !p.isConnected())
 			{
-				reconnecting = true;
-				try
-				{
-					p.getChannel().close();						// close old socket channel
-				}
-				catch (IOException e)
-				{
-					System.out.println(e.getMessage());
-				}
-				
-				p.setSocketChannel(player.getChannel());	// update the old player with new socket address				
+				reconnecting = true;				
+				p.setSocketChannel(player.getChannel());	// update the old player with new socket address	
+				prevLogin = p;
 				break;
 			}
 		}
 		
 		if (reconnecting)
 		{	
+			server.sendMessage(String.format("Welcome back %s!", prevLogin.getUsername()), prevLogin.getChannel());
+			server.sendMessage(prevLogin.stateString(), prevLogin.getChannel());
 			removePlayer(player);	// remove the new (duplicate) player
 			return;
 		}
