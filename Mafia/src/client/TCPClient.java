@@ -114,6 +114,9 @@ class TCPClient implements Runnable {
 				case "/getgamestatus":
 					packet = ClientPacket.getGameStatus();
 					break;
+				case "/createroom":
+					packet = ClientPacket.createRoom();
+					break;
 				default:
 					System.out.println("Not a vaild command");
 					break;

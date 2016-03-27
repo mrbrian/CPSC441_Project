@@ -200,17 +200,25 @@ public class SelectServer
 	    	
 	    	case Join:
 	    		{
-	    			// will join or if not exist, create room 
-		    		ClientJoinPacket cjp = new ClientJoinPacket(p);
+	    			
+	    			//make sure player has a pseudonym before they can use join
+	    			if (player.getPseudonym() != null) {
+	    			
+	    				// will join or if not exist, create room 
+	    				ClientJoinPacket cjp = new ClientJoinPacket(p);
 		    		
-		    		ReadyRoom room = room_mgr.open(cjp.roomId);
-		    		System.out.println("roomId: " + cjp.roomId);
+	    				ReadyRoom room = room_mgr.open(cjp.roomId);
+	    				System.out.println("roomId: " + cjp.roomId);
 		    		
-					room.joinRoom(player);	
-					int rmIdx = room.getId();
-		    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
+	    				room.joinRoom(player);	
+	    				int rmIdx = room.getId();
+	    				System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
 	
-		    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    				sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    			} else {
+	    				String msg = "You must use '/setalias' to choose a pseudonym before you can join a room";
+	    				sendMessage(msg, ch);	
+	    			}
 	    		}
 	    		break;
 

@@ -17,7 +17,8 @@ public class ClientPacket {
 		ListRooms,
 		Chat,
 		Vote,
-		GetGameStatus
+		GetGameStatus,
+		CreateRoom
 	}
 	
 	public PacketType type;
@@ -125,6 +126,10 @@ public class ClientPacket {
 	
 	public static ClientPacket getGameStatus(){
 		return new ClientPacket(PacketType.GetGameStatus, new byte[0]);
+	}
+	
+	public static ClientPacket createRoom() {
+		return new ClientPacket(PacketType.CreateRoom, new byte[0]);
 	}
 
 	
