@@ -17,7 +17,8 @@ public class ClientPacket {
 		ListRooms,
 		Chat,
 		Vote,
-		GetGameStatus
+		GetGameStatus,
+		CreateRoom
 	}
 	
 	public PacketType type;
@@ -125,6 +126,19 @@ public class ClientPacket {
 	
 	public static ClientPacket getGameStatus(){
 		return new ClientPacket(PacketType.GetGameStatus, new byte[0]);
+	}
+	
+	public static ClientPacket createRoom(int roomId) {
+		int totalSize = 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putInt(roomId);
+		buffer.flip();
+		
+		byte[] data = new byte[totalSize];
+		buffer.get(data);
+		
+		return new ClientPacket(PacketType.CreateRoom, data);
 	}
 
 	

@@ -114,6 +114,16 @@ class TCPClient implements Runnable {
 				case "/getgamestatus":
 					packet = ClientPacket.getGameStatus();
 					break;
+				case "/createroom":
+					if (tokens.length >= 2) {
+						
+						System.out.println(tokens[1]);
+						
+						packet = ClientPacket.createRoom(Integer.parseInt(tokens[1]));
+					} else {
+						System.out.println("error with join: must provide a room id");
+					}
+					break;
 				default:
 					System.out.println("Not a vaild command");
 					break;

@@ -188,25 +188,59 @@ public class SelectServer
 	    	
 	    	case Join:
 	    		{
-	    			// will join or if not exist, create room 
-		    		ClientJoinPacket cjp = new ClientJoinPacket(p);
+	    			
+	    			//make sure player has a pseudonym before they can use join
+	    			if (player.getPseudonym() != null) {
+	    			
+	    				// try to join
+	    				ClientJoinPacket cjp = new ClientJoinPacket(p);
 		    		
-		    		ReadyRoom room = room_mgr.open(cjp.roomId);
-		    		System.out.println("roomId: " + cjp.roomId);
-		    		
-					room.joinRoom(player);	
-					int rmIdx = room.getId();
-		    		System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
+	    				ReadyRoom room = room_mgr.findRoom(cjp.roomId);
+	    				
+	    				if (room != null) {
+	    					room.joinRoom(player);	
+	    					int rmIdx = room.getId();
+	    					System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
 	
-		    		sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    					sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    				} else {
+	    					sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
+	    				}
+	    			} else {
+	    				String msg = "You must use '/setalias' to choose a pseudonym before you can join a room";
+	    				sendMessage(msg, ch);	
+	    			}
 	    		}
+	    		break;
+	    		
+	    	case CreateRoom:
+	    		
+	    		//join packet has everything needed to create a room
+	    		ClientJoinPacket crp = new ClientJoinPacket(p);
+	    		
+	    		ReadyRoom room = room_mgr.create(crp.roomId);
+	    		if (room != null) { //room created 
+	    			int rmIdx = room.getId();
+	    			System.out.println(String.format("Created room [%s]: %d", player.getUsername(), rmIdx));
+	    			sendMessage(String.format("You created room #%d", rmIdx), ch);
+	    		} else {
+	    			sendMessage("Could not create room",ch);
+	    		}
+				
+	    		break;
+	    		
+	    	case ListRooms:
+	    		String msg;
+	    		
+	    		msg = room_mgr.getRooms();
+	    		sendMessage(msg,ch);
 	    		break;
 
 	    	case Logout:
 	    		int roomID = player.getRoomIndex();
 	    		
 	    		if (roomID != -1) {  //then in a game
-	    			ReadyRoom room = room_mgr.findRoom(roomID);
+	    			room = room_mgr.findRoom(roomID);
 	    			GameSpace game = room.getGameSpace();
 	    			game.removePlayer(player);	    			
 	    		}
