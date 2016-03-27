@@ -38,14 +38,21 @@ public class RoomManager implements Runnable{
 		quit = true;
 	}
 	
-	public ReadyRoom create()
+	public ReadyRoom create(int rmIdx)
 	{
-		ReadyRoom room = new ReadyRoom(server, roomCounter);
-		Date d = new Date();
-		last_update = (double)d.getTime() / 1000;
-		rooms.add(room);
-		roomCounter++;
-		return room;
+		ReadyRoom room = findRoom(rmIdx);
+		
+		if (room == null){
+			room = new ReadyRoom(server, rmIdx);
+			Date d = new Date();
+			last_update = (double)d.getTime() / 1000;
+			rooms.add(room);
+			roomCounter++;
+			return room;
+		}
+		
+		//return null if room already exists to show no new room was created
+		return null;
 	}
 	
 	public ReadyRoom findRoom(int idx)
@@ -63,7 +70,7 @@ public class RoomManager implements Runnable{
 		ReadyRoom room = findRoom(rmIdx);
 		
 		if (room == null)
-			room = create();
+			room = create(rmIdx);
 		
 		if (room != null)
 		{		
@@ -106,4 +113,13 @@ public class RoomManager implements Runnable{
 		}
 	}
 	
+	public String getRooms() {
+		String msg = "\nRoomId\tStatus";
+		
+		for (ReadyRoom rm : rooms) {
+			msg = msg + "\n" + rm.getId() + "\t" + rm.getState();
+		}
+		
+		return msg;
+	}
 }

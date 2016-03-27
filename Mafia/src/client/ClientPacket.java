@@ -128,8 +128,17 @@ public class ClientPacket {
 		return new ClientPacket(PacketType.GetGameStatus, new byte[0]);
 	}
 	
-	public static ClientPacket createRoom() {
-		return new ClientPacket(PacketType.CreateRoom, new byte[0]);
+	public static ClientPacket createRoom(int roomId) {
+		int totalSize = 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putInt(roomId);
+		buffer.flip();
+		
+		byte[] data = new byte[totalSize];
+		buffer.get(data);
+		
+		return new ClientPacket(PacketType.CreateRoom, data);
 	}
 
 	
