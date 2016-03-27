@@ -95,13 +95,17 @@ public class SelectServer
 		GameSpace game = room.getGameSpace();
 		
 		
-		if(game == null){			
+		if(game == null){	
+			
+			System.out.println("game space IS NULL");
 			for(Player p : room.getPlayerList()){
 				sendMessage(msg, p.getChannel());
 			}
 			
 			return;
 		}
+		
+		System.out.println("game space is NOT NULL");
 		
 		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
@@ -111,7 +115,24 @@ public class SelectServer
 			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
 			sendPacket(p, player.getChannel());
 		}
+	}
+	
+	// Will increment the lynch counter of the lynchee
+	public void lynchPlayer(Player lyncher, String victim){
+		int roomID = lyncher.getRoomIndex();
+		ReadyRoom room = room_mgr.findRoom(roomID);
+		GameSpace game = room.getGameSpace();
 		
+		System.out.println("Lyncher: " + lyncher.getPseudonym().toString());
+		System.out.println("Victim: " + victim);
+		
+		if(game == null){
+			System.out.println("game is NULL");
+		}
+		
+		//game.lynchVote(lyncher, victim);
+		
+		//game.lynchVote(lyncher, game.findPlayer(victim));
 	}
 	
     void sendPacket(ServerPacket p, SocketChannel ch) 
@@ -258,11 +279,15 @@ public class SelectServer
     	switch (p.type)
     	{	    	
     		case Vote:
+    			//lynchPlayer(player.getPlayer(), victim);
+	    		String victim = new String(p.data, 0, p.dataSize);
+    			System.out.println(player.getUsername() + " wants to lynch " + victim);
+    			lynchPlayer(player.getPlayer(), victim);
+    			
     			break;
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);
-	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
-	    		//sendMessageAll(showStr);
+	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg);
 	    		sendMessageToGroup(showStr, player.getPlayer());
 	    		System.out.println(showStr);	    			
 	    		break;

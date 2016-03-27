@@ -142,6 +142,24 @@ public class GameSpace{
 		return listeners;
 	}
 	
+	/* Convenience method when given a pseudonym, will return a type Player
+	 * corresponding to that pseudonym
+	 * */
+	public Player findPlayer(String victimPseudonym){
+		
+		Player toReturn = null;
+		
+		for(Player current : players){
+			if(current.getPseudonym().toString().equals(victimPseudonym)){
+				toReturn = current;
+				
+				System.out.println("Pseudonyms is: " + current.getPseudonym().toString());				
+			}
+		}
+		
+		return toReturn;		
+	}
+	
 	public ArrayList<Player> getPlayers() {
 		return players;
 	}
