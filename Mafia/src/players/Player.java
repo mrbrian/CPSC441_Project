@@ -59,6 +59,7 @@ public class Player {
 		isAlive = false;
 		new ArrayList<>();
 		playerType = null;
+		username = "NOT LOGGED IN";
 	}
 	
 	public void setPlayerType(PlayerTypes.PlayerType playerType){

@@ -17,19 +17,10 @@ import game_space.GameSpace;
 import game_space.ReadyRoom;
 import players.Player;
 import players.Player.PlayerState;
-import players.PlayerTypes.PlayerType;
 import server.FileIO;
 
 public class SelectServer 
 {
-	public enum SendDestination
-	{
-		Single,
-		All,
-		Room,
-		Team
-	}
-	
 	public static int BUFFERSIZE = 256;
 	
 	RoomManager room_mgr;
@@ -257,7 +248,6 @@ public class SelectServer
 	    	case Chat:
 	    		String msg = new String(p.data, 0, p.dataSize);
 	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
-	    		//sendMessageAll(showStr);
 	    		sendMessageToGroup(showStr, player.getPlayer());
 	    		System.out.println(showStr);	    			
 	    		break;
@@ -341,7 +331,6 @@ public class SelectServer
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
 	                        sendMessage("Welcome", cchannel);                    
-	                        //sendPacket(p, cchannel); 
 	                    } 
 	                    else 
 	                    {
@@ -360,7 +349,8 @@ public class SelectServer
 	                            int bytesRecv = cchannel.read(inBuffer);
 	                            if (bytesRecv <= 0)
 	                            {
-	                                System.out.println("read() error, or connection closed");
+	                            	Player p = plyr_mgr.findPlayer(cchannel.getRemoteAddress());
+	                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));
 	                                key.cancel();  // deregister the socket
 	                                continue;
 	                            }
