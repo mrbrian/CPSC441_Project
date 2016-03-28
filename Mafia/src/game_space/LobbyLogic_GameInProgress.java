@@ -33,14 +33,14 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		timer += elapsedTime;
 		currTime = new Date();
 		currState = game.updateState(currTime.getTime());
-		if (currState == 1) {
-			Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());
+		//if (currState == 1) {
+		//	Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());
 			//room.sendMessageRoom(String.format("******A new day begins...******"));
-		}
-		else if (currState == 0) {
-			Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());
+		//}
+		//else if (currState == 0) {
+		//	Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());
 			//room.sendMessageRoom(String.format("~~~~~~Night descends...~~~~~~~"));	
-		}
+		//}
 	
 	}
 
@@ -56,6 +56,21 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		}
 	}
 	
+	// Will increment the lynch counter of the victim
+	public void lynchPlayer(Player lyncher, String victim){		
+		System.out.println("Lyncher: " + lyncher.getPseudonym().toString());
+		System.out.println("Victim: " + victim);
+		
+		if(game == null){
+			System.out.println("game is NULL");
+		}else{
+			System.out.println("game is NOT NULL");
+		}
+		
+		//game.lynchVote(lyncher, victim);
+		game.lynchVote(lyncher, game.findPlayer(victim));
+	}
+	
 	@Override
 	public void processPacket(ClientPacket p, Player player) {
 
@@ -65,8 +80,15 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				String msg = new String(p.data, 0, p.dataSize);
 				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
 				sendMessageToGroup(showStr, player);
-				System.out.println(showStr);	    			
-			break;
+				System.out.println(showStr);
+				break;
+				
+			case Vote:
+				System.out.println("In LYNCH!");
+	    		String victim = new String(p.data, 0, p.dataSize);
+    			System.out.println(player.getUsername() + " wants to lynch " + victim);
+    			lynchPlayer(player.getPlayer(), victim);
+				break;
 		}		
 	}
 }
