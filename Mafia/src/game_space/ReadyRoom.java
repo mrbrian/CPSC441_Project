@@ -1,12 +1,15 @@
 package game_space;
 
+import java.nio.channels.SocketChannel;
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
+import client.ClientPacket;
 import game_space.ReadyRoom.State;
 import players.Player;
 import players.Player.PlayerState;
+import server.Outbox;
 import server.PlayerManager;
 import server.SelectServer;
 
@@ -20,19 +23,27 @@ public class ReadyRoom{
 		GameOver
 	}
 	
+	public final int NUM_PLAYERS_REQ;
 	private SelectServer server;
 	private LobbyLogic logic;
 	private State state;
-	private static final int NUM_PLAYERS_REQ = 2;
-	private String socket;
-	
+	private static final int NUM_PLAYERS_REQ_DEFAULT = 2;
 	//playerList is 2-tuple string of (IP,pseudonym)
 	private ArrayList<Player> playerList;
 	private GameSpace game;
 	private int id;
 	private boolean allReady;
-	
+
+	public ReadyRoom(SelectServer s, int id, int roomsize){
+		NUM_PLAYERS_REQ = roomsize;
+		this.id = id;
+		server = s;
+		playerList = new ArrayList<Player>();
+		changeState(State.NotReady);
+	}
+
 	public ReadyRoom(SelectServer s, int id){
+		this(s, id, NUM_PLAYERS_REQ_DEFAULT);
 		this.id = id;
 		server = s;
 		playerList = new ArrayList<Player>();
@@ -74,7 +85,7 @@ public class ReadyRoom{
 			return false;
 		}		 
 	}	
-	
+
 	public ArrayList<Player> getPlayerList() {
 		return playerList;
 	}
@@ -92,7 +103,12 @@ public class ReadyRoom{
 		//make game space
 		game = new GameSpace(playerList);
 		return game;
-	}	
+	}		
+	
+	public void processPackets(ClientPacket p, Player player)
+	{
+		logic.processPacket(p, player);
+	}
 	
 	public void changeState(State ns)
 	{
@@ -100,6 +116,9 @@ public class ReadyRoom{
 		
 		switch (ns)
 		{
+			case NotReady:
+				logic = new LobbyLogic_NotReady(this, playerList);
+				break;
 			case GameInProgress:
 				beginGame();
 				logic = new LobbyLogic_GameInProgress(this, game);
@@ -114,9 +133,6 @@ public class ReadyRoom{
 	
 	public void update(float elapsedTime) {
 		
-		if (state == State.NotReady && playerList.size() == NUM_PLAYERS_REQ)
-			changeState(State.Beginning);
-		
 		if (logic != null)
 			logic.update(elapsedTime);
 	}
@@ -124,14 +140,25 @@ public class ReadyRoom{
 	public void sendMessageRoom(String msg) {
 		for (Player p : playerList)
 		{		
+			if (!p.isConnected())
+				continue;
 			if (server == null)
 				System.out.println("sendMessageRoom warning: server == null");
 			else
-				server.sendMessage(msg, p.getChannel());
+				Outbox.sendMessage(msg, p.getChannel());
 		}
 	}
 
 	public State getState() {
 		return state;
+	}
+
+	public ArrayList<SocketChannel> getSocketChannelList() {
+		ArrayList<SocketChannel> result = new ArrayList<SocketChannel>();
+		
+		for(Player p : playerList)
+			result.add(p.getChannel());
+		
+		return result;
 	}
 }

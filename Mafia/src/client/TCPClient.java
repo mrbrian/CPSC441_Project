@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 
+import client.ClientPacket.PacketType;
 import server.ServerPacket; 
 
 class TCPClient implements Runnable {
@@ -113,6 +114,22 @@ class TCPClient implements Runnable {
 					break;
 				case "/getgamestatus":
 					packet = ClientPacket.getGameStatus();
+					break;
+				case "/createroom":
+					if (tokens.length >= 2) {
+						
+						System.out.println(tokens[1]);
+						
+						packet = ClientPacket.createRoom(Integer.parseInt(tokens[1]));
+					} else {
+						System.out.println("error with join: must provide a room id");
+					}
+					break;
+				case "/showstate":
+					packet = new ClientPacket(PacketType.ShowState, new byte[]{});
+					break;
+				case "/startgame":
+					packet = new ClientPacket(PacketType.StartGame, new byte[]{});
 					break;
 				default:
 					System.out.println("Not a vaild command");

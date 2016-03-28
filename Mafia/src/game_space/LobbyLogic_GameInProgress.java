@@ -1,39 +1,72 @@
 package game_space;
 
 import game_space.ReadyRoom.State;
+import players.Player;
+import server.Outbox;
+import server.ServerPacket;
 
-public class LobbyLogic_GameInProgress implements LobbyLogic{
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+
+import client.ClientPacket;
+
+public class LobbyLogic_GameInProgress extends LobbyLogic{
 	
 	private static final float TURN_INTERVAL = 60;  
 	private GameSpace game;
-	private ReadyRoom room;
 	private float timer;
 	private int turn_num;
+	private Date currTime;
+	private int oldState;
+	private int currState;
 	
 //State
 	public LobbyLogic_GameInProgress(ReadyRoom r, GameSpace g)
 	{
+		super(r);
 		game = g;
-		room = r;
 	}
 	
 	public void update(float elapsedTime)
 	{
 		timer += elapsedTime;
-
-		while (timer <= 0 && turn_num >= 0)
-		{			
-			// send to all people in the room
-			if (turn_num > 0)
-				room.sendMessageRoom(String.format("Beginning turn #%d..", turn_num));
-			timer += TURN_INTERVAL;
-			turn_num--; 
+		currTime = new Date();
+		currState = game.updateState(currTime.getTime());
+		if (currState == 1) {
+			Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());
+			//room.sendMessageRoom(String.format("******A new day begins...******"));
 		}
+		else if (currState == 0) {
+			Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());
+			//room.sendMessageRoom(String.format("~~~~~~Night descends...~~~~~~~"));	
+		}
+	
+	}
+
+	public void sendMessageToGroup(String msg, Player speaker) {
+				
+		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
-		//if (count == -1)
-		//{
-		//	room.sendMessageRoom("Game is finished!");
-		//	room.changeState(State.GameOver);
-		//}	
+		for (int i = 0; i < listeners.size(); i++) {
+			Player player = listeners.get(i);
+			
+			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+			Outbox.sendPacket(p, player.getChannel());
+		}
+	}
+	
+	@Override
+	public void processPacket(ClientPacket p, Player player) {
+
+		switch(p.type)
+		{		
+			case Chat:
+				String msg = new String(p.data, 0, p.dataSize);
+				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+				sendMessageToGroup(showStr, player);
+				System.out.println(showStr);	    			
+			break;
+		}		
 	}
 }

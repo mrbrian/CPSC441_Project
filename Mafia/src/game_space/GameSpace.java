@@ -8,7 +8,7 @@ import players.PlayerTypes;
 import java.util.ArrayList;
 
 public class GameSpace{
-	private Random randGen;
+	private Random randGen = new Random();
 	private Player lynchVictim = null;
 	private Player murderVictim = null;
 	private boolean lynchOngoing;
@@ -17,9 +17,11 @@ public class GameSpace{
 	private boolean canMurder;
 	private int lynchCount = 0;
 	private int murderCount = 0;
-	private long dayTime = 300000;		//300000ms = 5min
-	private long nightTime = 150000;	//150000ms = 2.5min
+	private long dayTime = 5000; //300000;		//300000ms = 5min
+	private long nightTime = 2000;//150000;	//150000ms = 2.5min
+	private long voteTime = 60000; //60000 = 1min
 	private long switchTime = 0;
+	private long voteBegin = 0;
 	
 	private ArrayList<Player> players;
 	private ArrayList<Player> innocent;
@@ -31,6 +33,7 @@ public class GameSpace{
 	
 	public GameSpace(ArrayList<Player> connected) {
 		players = connected;
+		assignTeams();
 	}
 
 	public void assignTeams() {
@@ -54,20 +57,25 @@ public class GameSpace{
 		}
 	}
 	
-	public gameState updateState(long callTime) {
-		if (switchTime == 0)
+	public int updateState(long callTime) {
+		if (switchTime == 0) {
 			switchTime = callTime;
+			nextDay();
+			return 1;
+		}
 		if (currentState == gameState.DAY) {
 			if (switchTime + dayTime <= callTime)
 				switchTime = callTime;
 				nextNight();
+				return 0;
 		}
 		if (currentState == gameState.NIGHT) {
 			if (switchTime + nightTime <= callTime)
 				switchTime = callTime;
 				nextDay();
+				return 1;
 		}
-		return currentState;
+		return -1;
 	}
 	
 	public void nextDay() {
@@ -91,6 +99,20 @@ public class GameSpace{
 		canMurder = false;
 		lynchCount = 0;
 		murderCount = 0;
+		voteBegin = 0;
+	}
+	
+	public boolean checkVote(long voteTime) {
+		if (voteBegin == 0 && (lynchOngoing || murderOngoing == true)) {
+			voteBegin = voteTime;
+		}
+		else {
+			if (voteTime >= voteBegin + voteTime) {
+				voteReset();
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void lynchVote(Player lyncher, Player victim) {

@@ -1,5 +1,7 @@
 package players;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
@@ -9,15 +11,14 @@ public class Player {
 	{		
 		Not_Logged_In,
 		Logged_In,
-		In_Room,
-		Reconnect_Waiting
+		In_Room
 	}
 	
 	private String username;
 	private String pseudonym;
 	
 	private String IPAddress;
-	private String portNumber;
+	private int portNumber;
 	private SocketChannel channel;
 	private PlayerTypes.PlayerType playerType;
 	
@@ -59,6 +60,7 @@ public class Player {
 		isAlive = false;
 		new ArrayList<>();
 		playerType = null;
+		username = "NOT_LOGGED_IN";
 	}
 	
 	public void setPlayerType(PlayerTypes.PlayerType playerType){
@@ -72,16 +74,16 @@ public class Player {
 	public String getIPAddress(){
 		return IPAddress;
 	}
-	
+
 	public void setIPAddress(String s){
 		IPAddress = s;
 	}
-	
-	public void setPortNumber(String portNumber){
+
+	public void setPortNumber(int portNumber){
 		this.portNumber = portNumber;
 	}
 	
-	public String getPortNumber(){
+	public int getPortNumber(){
 		return portNumber;
 	}
 	
@@ -125,16 +127,48 @@ public class Player {
 		return state;
 	}
 
-	public Object getUsername() {
+	public String getUsername() {
 		return username;
 	}
 
 	public SocketChannel getChannel() {
 		return channel;
 	}
-	
+
 	public Player getPlayer(){
 		return this;
 	}
+	
+	public boolean isConnected(){
+		return (channel != null);
+	}
 
+	public void setSocketChannel(SocketChannel ch) {
+		channel = ch;
+		if (ch == null)
+			return;
+		try{
+			InetSocketAddress addr = (InetSocketAddress)(ch.getRemoteAddress());
+			setPortNumber(addr.getPort());
+			setIPAddress(addr.getAddress().toString());
+		}
+		catch(IOException e)
+		{
+			setIPAddress("NOT VALID: " + e.getMessage());
+		}
+	}	
+	
+	public String stateString(){
+		String result = String.format("Username: %s\nPseudonym: %s\nIP addr: %s\nPort: %d\nChannel: %s\nPlayerType: %s\nState: %s\nRoomIndex: %d\nisAlive: %s\n",
+				username,
+				pseudonym,
+				IPAddress, 
+				portNumber,
+				channel,
+				playerType,
+				state,
+				roomIndex,
+				isAlive);	
+		return result;
+	}
 }
