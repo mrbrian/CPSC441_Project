@@ -1,6 +1,5 @@
 package server;
 
-import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;

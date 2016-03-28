@@ -1,6 +1,7 @@
 package players;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
@@ -73,11 +74,11 @@ public class Player {
 	public String getIPAddress(){
 		return IPAddress;
 	}
-	
+
 	public void setIPAddress(String s){
 		IPAddress = s;
 	}
-	
+
 	public void setPortNumber(String portNumber){
 		this.portNumber = portNumber;
 	}
@@ -147,7 +148,9 @@ public class Player {
 		if (ch == null)
 			return;
 		try{
-			setIPAddress(ch.getRemoteAddress().toString());
+			InetSocketAddress addr = (InetSocketAddress)(ch.getRemoteAddress());
+			setPortNumber(portNumber);
+			setIPAddress(addr.toString());
 		}
 		catch(IOException e)
 		{
