@@ -176,6 +176,20 @@ public class GameSpace{
 	public ArrayList <Player> whoCanChatWith(Player speaker) {	
 		ArrayList<Player> listeners = null;
 		
+		if(speaker == null){
+			System.out.println("speaker is NULL");
+		}else{
+			System.out.println("speaker is NOT NULL");
+			
+		}
+		
+		if(graveyard == null){
+			System.out.println("graveyard is NULL");
+		}else{
+			System.out.println("graveyard is NOT NULL");
+			
+		}
+		
 		if (speaker.getIsAlive() == false && graveyard.size() > 1)
 			listeners = graveyard;
 		

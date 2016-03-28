@@ -31,9 +31,9 @@ public class LobbyLogic_GameInProgress implements LobbyLogic{
 		}
 		
 		//if (count == -1)
-		{
-			room.sendMessageRoom("Game is finished!");
-			room.changeState(State.GameOver);
-		}	
+		//{
+		//	room.sendMessageRoom("Game is finished!");
+		//	room.changeState(State.GameOver);
+		//}	
 	}
 }
