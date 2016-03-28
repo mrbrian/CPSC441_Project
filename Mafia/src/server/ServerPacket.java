@@ -144,7 +144,6 @@ public class ServerPacket
 	//builds a packet for listing all users
 	public static ServerPacket buildListUsersPacket(String msg, int numUsers, String usernames[]) {
 		
-		
 		int totalUserNamesLen = 0;
 		
 		for (int i = 0; i < usernames.length; i++) {

@@ -211,7 +211,7 @@ class TCPClient implements Runnable {
 	
 	        while (!line.equals("logout"))
 	        {
-		        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
+		        //System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
 		        line = inFromUser.readLine();
 		         
 		        if (!line.isEmpty()) 
