@@ -2,20 +2,20 @@ package game_space;
 
 import java.util.ArrayList;
 
+import client.ClientPacket;
 import game_space.ReadyRoom.State;
 import players.Player;
 import server.SelectServer;
 
-public class LobbyLogic_Beginning implements LobbyLogic{
+public class LobbyLogic_Beginning extends LobbyLogic{
 		
 	private static final float COUNT_INTERVAL = 2;
 	private int count;
 	private float timer;
-	private ReadyRoom room;
 	
 	public LobbyLogic_Beginning(ReadyRoom r)
 	{
-		room = r;
+		super(r);
 		count = 5;
 	}
 	
@@ -37,5 +37,16 @@ public class LobbyLogic_Beginning implements LobbyLogic{
 			room.sendMessageRoom("Game starting now!");
 			room.changeState(State.GameInProgress);
 		}	
+	}
+
+	@Override
+	public void processPacket(ClientPacket p, Player player) {
+		switch (p.type)
+		{
+			default:
+				super.processPacket(p, player);
+				break;
+		}
+		
 	}
 }

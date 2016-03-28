@@ -76,12 +76,12 @@ public class PlayerManager implements Iterable<Player>
 		
 		if (reconnecting)
 		{	
-			server.sendMessage(String.format("Welcome back %s!", prevLogin.getUsername()), prevLogin.getChannel());
-			server.sendMessage(prevLogin.stateString(), prevLogin.getChannel());
+			Outbox.sendMessage(String.format("Welcome back %s!", prevLogin.getUsername()), prevLogin.getChannel());
+			Outbox.sendMessage(prevLogin.stateString(), prevLogin.getChannel());
 			removePlayer(player);	// remove the new (duplicate) player
 			return;
 		}
-		
+		player.setPseudonym(player.getUsername());
 		player.setState(PlayerState.Logged_In);
 						
 	}

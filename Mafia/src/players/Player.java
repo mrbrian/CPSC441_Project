@@ -18,7 +18,7 @@ public class Player {
 	private String pseudonym;
 	
 	private String IPAddress;
-	private String portNumber;
+	private int portNumber;
 	private SocketChannel channel;
 	private PlayerTypes.PlayerType playerType;
 	
@@ -79,11 +79,11 @@ public class Player {
 		IPAddress = s;
 	}
 
-	public void setPortNumber(String portNumber){
+	public void setPortNumber(int portNumber){
 		this.portNumber = portNumber;
 	}
 	
-	public String getPortNumber(){
+	public int getPortNumber(){
 		return portNumber;
 	}
 	
@@ -127,7 +127,7 @@ public class Player {
 		return state;
 	}
 
-	public Object getUsername() {
+	public String getUsername() {
 		return username;
 	}
 
@@ -149,8 +149,8 @@ public class Player {
 			return;
 		try{
 			InetSocketAddress addr = (InetSocketAddress)(ch.getRemoteAddress());
-			setPortNumber(portNumber);
-			setIPAddress(addr.toString());
+			setPortNumber(addr.getPort());
+			setIPAddress(addr.getAddress().toString());
 		}
 		catch(IOException e)
 		{

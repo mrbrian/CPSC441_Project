@@ -7,7 +7,6 @@ import java.util.Date;
 import client.ClientPacket;
 import game_space.ReadyRoom;
 import players.Player;
-import players.Player.PlayerState;
 
 public class RoomManager implements Runnable{
 
@@ -82,15 +81,15 @@ public class RoomManager implements Runnable{
 		return null;
 	}
 
-	public ServerPacket processPacket(ClientPacket p, SocketChannel ch) {
-		switch (p.type)
-		{
-			case Vote:
-				break;
-			case Invite:
-				break;
-		}
-		return null;
+	public void processPacket(ClientPacket p, Player player) {
+		// find which room it should go to
+		ReadyRoom r = findRoom(player);
+		r.processPackets(p, player);
+	}
+
+	private ReadyRoom findRoom(Player p) {
+		int idx = p.getRoomIndex();
+		return (findRoom(idx));
 	}
 
 	@Override
@@ -107,7 +106,7 @@ public class RoomManager implements Runnable{
 				last_update = currTime;
 			}
 			try {
-				thread.sleep(10);
+				thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

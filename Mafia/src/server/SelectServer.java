@@ -61,50 +61,6 @@ public class SelectServer
 			System.exit(1);
 		}
 	}
-
-	public void sendMessageAll(String msg) 
-	{
-        Iterator<Player> playerItr = plyr_mgr.iterator();
-
-        while (playerItr.hasNext()) 
-        {		
-        	Player player = playerItr.next();
-        	
-			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
-			sendPacket(p, player.getChannel());
-		}
-	}
-	
-	public void sendMessage(String msg, SocketChannel ch)
-	{
-		ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
-		sendPacket(p, ch);
-	}
-	
-	public void sendMessageToGroup(String msg, Player speaker) throws IOException {
-		int roomID = speaker.getRoomIndex();
-		ReadyRoom room = room_mgr.findRoom(roomID);
-		GameSpace game = room.getGameSpace();
-		
-		if (room.getState() != State.GameInProgress || game == null){			
-			for(Player p : room.getPlayerList()){
-				sendMessage(msg, p.getChannel());
-			}
-			
-			return;
-		}
-		
-		System.out.println("game space is NOT NULL");
-		
-		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
-		
-		for (int i = 0; i < listeners.size(); i++) {
-			Player player = listeners.get(i);
-			
-			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
-			sendPacket(p, player.getChannel());
-		}
-	}
 	
 	// Will increment the lynch counter of the lynchee
 	public void lynchPlayer(Player lyncher, String victim){
@@ -124,26 +80,6 @@ public class SelectServer
 		//game.lynchVote(lyncher, game.findPlayer(victim));
 	}
 	
-    void sendPacket(ServerPacket p, SocketChannel ch) 
-    {
-    	if (ch == null)
-    	{
-    		System.out.println(String.format("sendPacket warning (ch == null): %s ", p.msg));
-    		return;
-    	}
-    	try
-    	{
-	    	ByteBuffer inBuffer = ByteBuffer.allocateDirect(p.getSize());
-	    	p.write(inBuffer);
-	    	inBuffer.rewind();
-	    	ch.write(inBuffer);
-    	}
-    	catch (IOException e)
-    	{
-    		System.out.println(String.format("sendPacket error: %s", e.getMessage()));
-    	}
-    }    
-    
     void processUnrestrictedCommands(ClientPacket p, SocketChannel ch) throws IOException
     {
     	SocketAddress socketAddress = ch.getRemoteAddress();
@@ -168,7 +104,7 @@ public class SelectServer
     			
     			if(saveInfo.doesUsrExist(username) == false){
     				saveInfo.saveUserData(username, password); 
-    	    		sendMessage("Creating a new account..", ch);
+    				Outbox.sendMessage("Creating a new account..", ch);
     			}else{
     				System.out.println("Error Username Already Exists");
     			}
@@ -182,18 +118,18 @@ public class SelectServer
     			if(saveInfo.checkCredentials(clp.username, clp.password)){
     				plyr_mgr.login(player);
         			System.out.println(String.format("Login [%s]", player.getUsername()));
-    	    		sendMessage(String.format("Access Granted!\n Logged in successfully as: %s", clp.username), ch);    	    		
+        			Outbox.sendMessage(String.format("Access Granted!\n Logged in successfully as: %s", clp.username), ch);    	    		
     			}else{
-    				sendMessage("Access Denied!", ch);
+    				Outbox.sendMessage("Access Denied!", ch);
     			}
     			
 	    		break;		    		
 
 	    	case ShowState:
-	    		sendMessage(player.stateString(), ch);
+	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
 			default:
-	    		sendMessage("Log in first!", ch);
+				Outbox.sendMessage("Log in first!", ch);
 				break;
 		}
     }
@@ -226,13 +162,13 @@ public class SelectServer
 	    					int rmIdx = room.getId();
 	    					System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
 	
-	    					sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
 	    				} else {
-	    					sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
+	    					Outbox.sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
 	    				}
 	    			} else {
 	    				String msg = "You must use '/setalias' to choose a pseudonym before you can join a room";
-	    				sendMessage(msg, ch);	
+	    				Outbox.sendMessage(msg, ch);	
 	    			}
 	    		}
 	    		break;
@@ -246,9 +182,9 @@ public class SelectServer
 	    		if (room != null) { //room created 
 	    			int rmIdx = room.getId();
 	    			System.out.println(String.format("Created room [%s]: %d", player.getUsername(), rmIdx));
-	    			sendMessage(String.format("You created room #%d", rmIdx), ch);
+	    			Outbox.sendMessage(String.format("You created room #%d", rmIdx), ch);
 	    		} else {
-	    			sendMessage("Could not create room",ch);
+	    			Outbox.sendMessage("Could not create room",ch);
 	    		}
 				
 	    		break;
@@ -257,7 +193,7 @@ public class SelectServer
 	    		String msg;
 	    		
 	    		msg = room_mgr.getRooms();
-	    		sendMessage(msg,ch);
+	    		Outbox.sendMessage(msg,ch);
 	    		break;
 
 	    	case Logout:
@@ -281,16 +217,16 @@ public class SelectServer
 	    		while(playerList.hasNext()){
 	    			String element = playerList.next().getUsername().toString();
 	    			System.out.println(element);
-		    		sendMessage(element, ch);
+	    			Outbox.sendMessage(element, ch);
 	    		}   		
 	    		
 	    		break;
 	    	case ShowState:
-	    		sendMessage(player.stateString(), ch);
+	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
-    			sendMessage(String.format("Could not process command: %s",  p.type.toString()), ch);
+    			Outbox.sendMessage(String.format("Could not process command: %s",  p.type.toString()), ch);
     			break;
     	}
     }
@@ -300,7 +236,7 @@ public class SelectServer
     	SocketAddress socketAddress = ch.getRemoteAddress();
     	Player player = plyr_mgr.findPlayer(socketAddress);
     	
-		ServerPacket sp = room_mgr.processPacket(p, ch);
+		room_mgr.processPacket(p, player);
     	switch (p.type)
     	{	    	
     		case Vote:
@@ -310,14 +246,8 @@ public class SelectServer
     			lynchPlayer(player.getPlayer(), victim);
     			
     			break;
-	    	case Chat:
-	    		String msg = new String(p.data, 0, p.dataSize);
-	    		String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
-	    		sendMessageToGroup(showStr, player.getPlayer());
-	    		System.out.println(showStr);	    			
-	    		break;
 	    	case ShowState:
-	    		sendMessage(player.stateString(), ch);
+	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
     		default:
     			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
@@ -398,7 +328,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	                        sendMessage("Welcome!", cchannel);                    
+	        	    		Outbox.sendMessage("Welcome!", cchannel);                    
 	                    } 
 	                    else 
 	                    {

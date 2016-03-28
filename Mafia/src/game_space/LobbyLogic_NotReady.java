@@ -2,17 +2,17 @@ package game_space;
 
 import java.util.ArrayList;
 
+import client.ClientPacket;
 import game_space.ReadyRoom.State;
 import players.Player;
-import server.SelectServer;
 
-public class LobbyLogic_NotReady implements LobbyLogic{
+public class LobbyLogic_NotReady extends LobbyLogic{
 		
 	private ArrayList<Player> players;
-	private ReadyRoom room;
 	
 	public LobbyLogic_NotReady(ReadyRoom r, ArrayList<Player> ps)
 	{
+		super(r);
 		room = r;
 		players = ps;
 	}
@@ -21,5 +21,18 @@ public class LobbyLogic_NotReady implements LobbyLogic{
 	{
 		if (players.size() == room.NUM_PLAYERS_REQ)
 			room.changeState(State.Beginning);			
+	}
+
+	@Override
+	public void processPacket(ClientPacket p, Player player) {
+		switch (p.type)
+		{
+			case StartGame:
+				room.changeState(State.Beginning);
+				break;
+			default:
+				super.processPacket(p, player);
+				break;
+		}		
 	}
 }

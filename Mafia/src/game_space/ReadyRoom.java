@@ -1,12 +1,15 @@
 package game_space;
 
+import java.nio.channels.SocketChannel;
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
+import client.ClientPacket;
 import game_space.ReadyRoom.State;
 import players.Player;
 import players.Player.PlayerState;
+import server.Outbox;
 import server.PlayerManager;
 import server.SelectServer;
 
@@ -82,7 +85,7 @@ public class ReadyRoom{
 			return false;
 		}		 
 	}	
-	
+
 	public ArrayList<Player> getPlayerList() {
 		return playerList;
 	}
@@ -100,7 +103,12 @@ public class ReadyRoom{
 		//make game space
 		game = new GameSpace(playerList);
 		return game;
-	}	
+	}		
+	
+	public void processPackets(ClientPacket p, Player player)
+	{
+		logic.processPacket(p, player);
+	}
 	
 	public void changeState(State ns)
 	{
@@ -137,11 +145,20 @@ public class ReadyRoom{
 			if (server == null)
 				System.out.println("sendMessageRoom warning: server == null");
 			else
-				server.sendMessage(msg, p.getChannel());
+				Outbox.sendMessage(msg, p.getChannel());
 		}
 	}
 
 	public State getState() {
 		return state;
+	}
+
+	public ArrayList<SocketChannel> getSocketChannelList() {
+		ArrayList<SocketChannel> result = new ArrayList<SocketChannel>();
+		
+		for(Player p : playerList)
+			result.add(p.getChannel());
+		
+		return result;
 	}
 }
