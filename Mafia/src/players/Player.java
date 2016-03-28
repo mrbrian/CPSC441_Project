@@ -11,7 +11,7 @@ public class Player {
 	{		
 		Not_Logged_In,
 		Logged_In,
-		In_Room			
+		In_Room
 	}
 	
 	private String username;

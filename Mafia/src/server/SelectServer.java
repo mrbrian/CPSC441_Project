@@ -15,6 +15,7 @@ import client.ClientPacket;
 import client.packets.*;
 import game_space.GameSpace;
 import game_space.ReadyRoom;
+import game_space.ReadyRoom.State;
 import players.Player;
 import players.Player.PlayerState;
 import server.FileIO;
@@ -85,8 +86,7 @@ public class SelectServer
 		ReadyRoom room = room_mgr.findRoom(roomID);
 		GameSpace game = room.getGameSpace();
 		
-		
-		if(game == null){			
+		if (room.getState() != State.GameInProgress || game == null){			
 			for(Player p : room.getPlayerList()){
 				sendMessage(msg, p.getChannel());
 			}
