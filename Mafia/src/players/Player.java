@@ -57,7 +57,7 @@ public class Player {
 		
 		state = PlayerState.Not_Logged_In;
 		roomIndex = -1;
-		isAlive = false;
+		isAlive = true;
 		new ArrayList<>();
 		playerType = null;
 		username = "NOT_LOGGED_IN";
