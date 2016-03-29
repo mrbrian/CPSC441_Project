@@ -10,15 +10,21 @@ import players.Player;
 
 public class RoomManager implements Runnable{
 
-	Thread thread;
-	int roomCounter;
-	ArrayList<ReadyRoom> rooms;
-	SelectServer server;
-	double last_update;
-	boolean quit;
+	private Thread thread;
+	private ArrayList<ReadyRoom> rooms;
+	private SelectServer server;
+	private double last_update;
+	private boolean quit;	
+	private static RoomManager instance;
+	
+	public static RoomManager getInstance()
+	{ 
+		return instance;
+	}
 	
 	public RoomManager(SelectServer s)
 	{
+		instance = this;
 		server = s;
 		rooms = new ArrayList<ReadyRoom>();
 		startThread();
@@ -48,7 +54,6 @@ public class RoomManager implements Runnable{
 			Date d = new Date();
 			last_update = (double)d.getTime() / 1000;
 			rooms.add(room);
-			roomCounter++;
 			return room;
 		}
 		
@@ -65,22 +70,6 @@ public class RoomManager implements Runnable{
 		return null;
 	}
 	
-	// tries to access the room, if not found, creates a new room (with roomindex = counter++)
-	public ReadyRoom open(int rmIdx) 
-	{
-		ReadyRoom room = findRoom(rmIdx);
-		
-		if (room == null)
-			room = create(rmIdx);
-		
-		if (room != null)
-		{		
-			return room;
-		}
-		
-		return null;
-	}
-
 	public void processPacket(ClientPacket p, Player player) {
 		// find which room it should go to
 		ReadyRoom r = findRoom(player);

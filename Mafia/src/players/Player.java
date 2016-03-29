@@ -5,6 +5,9 @@ import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
+import game_space.ReadyRoom;
+import server.RoomManager;
+
 public class Player {
 
 	public enum PlayerState
@@ -170,5 +173,12 @@ public class Player {
 				roomIndex,
 				isAlive);	
 		return result;
+	}
+
+	public void leaveRoom() {
+		ReadyRoom room = RoomManager.getInstance().findRoom(roomIndex);
+		room.getPlayerList().remove(this);
+		roomIndex = -1;		
+		state = PlayerState.Logged_In;
 	}
 }

@@ -2,8 +2,6 @@ package game_space;
 
 import java.util.Random;
 
-import com.sun.org.apache.bcel.internal.generic.ISUB;
-
 import players.Player;
 import players.PlayerTypes;
 
@@ -287,4 +285,25 @@ public class GameSpace{
 			return murderVictim;
 		}
 	}
+
+
+	public int switchTurn(long callTime) {
+		switchTime = callTime - dayTime - nightTime;
+		return updateState(callTime);
+		
+	}
+
+	public String getChatString(Player player, String msg) {
+		String result = "Chat";
+		
+		if (currentState == gameState.NIGHT && mafioso.contains(player))
+			result = String.format("(Mafia Only) [%s]: %s", player.getPseudonym(), msg);
+		else if (graveyard.contains(player))
+			result = String.format("(Dead Chat) [%s]: %s", player.getPseudonym(), msg);
+		else 
+			result = String.format("(Game Chat) [%s]: %s", player.getPseudonym(), msg);
+		
+		return result;
+	}
 }
+

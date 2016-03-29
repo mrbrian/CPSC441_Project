@@ -20,7 +20,9 @@ public class ClientPacket {
 		GetGameStatus,
 		CreateRoom,
 		ShowState,
-		StartGame
+		StartGame,
+		SwitchTurn,
+		Leave
 	}
 	
 	public PacketType type;

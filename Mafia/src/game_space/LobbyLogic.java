@@ -19,10 +19,19 @@ public abstract class LobbyLogic {
 		switch(p.type)
 		{
 			case Chat:
+			{
 				String msg = new String(p.data, 0, p.dataSize);
 				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
 				room.sendMessageRoom(showStr);
-				System.out.println(showStr);	    			
+				System.out.println(showStr);
+			}
+			break;
+			case Leave:
+			{
+				String showStr = String.format("%s left the room.", player.getUsername());
+				room.sendMessageRoom(showStr);
+				player.leaveRoom();				
+			}
 			break;
 		}
 	}

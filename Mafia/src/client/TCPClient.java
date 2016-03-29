@@ -40,7 +40,7 @@ class TCPClient implements Runnable {
 		switch (p.pType)
 		{			
 			default:
-				System.out.println(String.format("%s: %s", p.pType.toString(), p.msg));	            
+				System.out.println(String.format("%s", p.msg));	            
 				break;
 		}	
 	}
@@ -130,6 +130,12 @@ class TCPClient implements Runnable {
 					break;
 				case "/startgame":
 					packet = new ClientPacket(PacketType.StartGame, new byte[]{});
+					break;
+				case "/leave":
+					packet = new ClientPacket(PacketType.Leave, new byte[]{});
+					break;
+				case "/switchturn":
+					packet = new ClientPacket(PacketType.SwitchTurn, new byte[]{});
 					break;
 				default:
 					System.out.println("Not a vaild command");

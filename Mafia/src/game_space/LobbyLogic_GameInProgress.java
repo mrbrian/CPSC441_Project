@@ -88,20 +88,21 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 			Outbox.sendPacket(p, player.getChannel());
 		}
 	}
-	
+
 	@Override
 	public void processPacket(ClientPacket p, Player player) {
 		String msgToDisplay;
-		
+
 		switch(p.type)
-		{		
+			{	
 			case Chat:
-				String msg = new String(p.data, 0, p.dataSize);
-				String showStr = String.format("Chat [%s]: %s", player.getPseudonym(), msg); 
+			{
+				String msg = new String(p.data, 0, p.dataSize);				
+				String showStr = game.getChatString(player, msg);
 				sendMessageToGroup(showStr, player);
 				System.out.println(showStr);
-				break;
-				
+			}
+			break;
 			case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);	    		
     			
@@ -128,9 +129,25 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
     			}
     			
 				break;
-				
-			default:
-				break;
+			case Join:
+			case Leave:
+			{
+				String showStr = "You can't leave while a game is in progress!"; 
+				Outbox.sendMessage(showStr, player.getChannel());
+			}
+			break;
+			case SwitchTurn:
+			{
+				Date currTime = new Date();
+				int currState = game.switchTurn(currTime.getTime());
+				if (currState == 1) {
+					Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());					
+				}
+				else if (currState == 0) {
+					Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());					
+				}				
+			}
+			break;
 		}		
 	}
 }
