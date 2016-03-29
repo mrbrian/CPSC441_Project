@@ -62,10 +62,32 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		switch(p.type)
 		{		
 			case Chat:
+			{
 				String msg = new String(p.data, 0, p.dataSize);
 				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
 				sendMessageToGroup(showStr, player);
-				System.out.println(showStr);	    			
+				System.out.println(showStr);
+			}
+			break;
+			case Leave:
+			{
+				String msg = new String(p.data, 0, p.dataSize);
+				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+				sendMessageToGroup(showStr, player);
+				System.out.println(showStr);
+			}
+			break;
+			case SwitchTurn:
+			{
+				Date currTime = new Date();
+				int currState = game.switchTurn(currTime.getTime());
+				if (currState == 1) {
+					Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());					
+				}
+				else if (currState == 0) {
+					Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());					
+				}				
+			}
 			break;
 		}		
 	}

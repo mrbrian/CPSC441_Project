@@ -217,5 +217,11 @@ public class GameSpace{
 		mafioso.remove(player);
 		innocent.remove(player);		
 	}
+
+	public int switchTurn(long callTime) {
+		switchTime = callTime - dayTime - nightTime;
+		return updateState(callTime);
+		
+	}
 	
 }

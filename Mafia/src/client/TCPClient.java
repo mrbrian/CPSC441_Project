@@ -131,6 +131,12 @@ class TCPClient implements Runnable {
 				case "/startgame":
 					packet = new ClientPacket(PacketType.StartGame, new byte[]{});
 					break;
+				case "/leave":
+					packet = new ClientPacket(PacketType.Leave, new byte[]{});
+					break;
+				case "/switchturn":
+					packet = new ClientPacket(PacketType.SwitchTurn, new byte[]{});
+					break;
 				default:
 					System.out.println("Not a vaild command");
 					break;
