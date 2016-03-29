@@ -103,10 +103,6 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				
 			case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);
-	    		
-	    		System.out.println("lyncher (in process packet): " + player.getPseudonym().toString());
-	    		System.out.println("lyncher (in process packet): " + victim);
-	    		
     			game.lynchVote(player, victim);
 				break;
 				

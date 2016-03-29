@@ -128,42 +128,34 @@ public class GameSpace{
 	 * */
 	public void lynchVote(Player lyncher, String victimPseudonym) {
 		Player victim = null;
-		
-		System.out.println("Lyncher is (outside): " + lyncher.getPseudonym().toString());
-		System.out.println("Victim is (outside): " + victimPseudonym);
-		
+
 		for(Player current : players){
-			System.out.println("Current Players: " + current.getPseudonym().toString());
 			if(current.getPseudonym().toString().equals(victimPseudonym)){
 				victim = current;
 			}
 		}
 		
-		if (canLynch == true) {
-			if (lynchVictim == null && lynchOngoing == false) {
-				lynchVictim = victim;
-				lynchCount++;
-				lynchOngoing = true;
-				
-				System.out.println("lyncher is: " + lyncher.getPseudonym().toString());
-				System.out.println("victim is: " + victim.getPseudonym().toString());
-				
-				System.out.println("lynch count: " + lynchCount);
-				
-				//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
-			}
-			else if (victim != lynchVictim && lynchOngoing == true) {
-				//System.out.println("Only one lynch vote may be ongoing at a time");
-			}
-			else {
-				lynchCount++;
-				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+		System.out.println("Current State is: " + currentState);
+		if(currentState.equals(gameState.NIGHT)){
+			murderVote(lyncher, victim);
+		}else{
+			if (canLynch == true) {
+				if (lynchVictim == null && lynchOngoing == false) {
+					lynchVictim = victim;
+					lynchCount++;
+					lynchOngoing = true;
+					
+					//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+				}
+				else if (victim != lynchVictim && lynchOngoing == true) {
+					//System.out.println("Only one lynch vote may be ongoing at a time");
+				}
+				else {
+					lynchCount++;
+					//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+				}
 			}
 		}
-		
-		System.out.println("canLynch is: " + canLynch);
-		System.out.println("lynch count: " + lynchCount);
-
 	}
 	
 	public Player lynchCheck() {
@@ -176,6 +168,9 @@ public class GameSpace{
 	}
 
 	public void murderVote(Player murderer, Player victim) {
+		
+		System.out.println("In murderVote");
+		
 		if (canMurder == true && mafioso.contains(murderer) == true) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
