@@ -27,6 +27,7 @@ public class ReadyRoom{
 	private SelectServer server;
 	private LobbyLogic logic;
 	private State state;
+	
 	private static final int NUM_PLAYERS_REQ_DEFAULT = 2;
 	//playerList is 2-tuple string of (IP,pseudonym)
 	private ArrayList<Player> playerList;
@@ -125,6 +126,9 @@ public class ReadyRoom{
 				break;
 			case Beginning:
 				logic = new LobbyLogic_Beginning(this);
+				break;
+			case GameOver:
+				logic = new LobbyLogic_GameOver(this);
 				break;
 		}
 		

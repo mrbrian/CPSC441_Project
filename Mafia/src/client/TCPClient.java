@@ -40,7 +40,7 @@ class TCPClient implements Runnable {
 		switch (p.pType)
 		{			
 			default:
-				System.out.println(String.format("%s: %s", p.pType.toString(), p.msg));	            
+				System.out.println(String.format("%s", p.msg));	            
 				break;
 		}	
 	}
@@ -217,7 +217,7 @@ class TCPClient implements Runnable {
 	
 	        while (!line.equals("logout"))
 	        {
-		        System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
+		        //System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
 		        line = inFromUser.readLine();
 		         
 		        if (!line.isEmpty()) 

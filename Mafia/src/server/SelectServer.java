@@ -62,23 +62,7 @@ public class SelectServer
 		}
 	}
 	
-	// Will increment the lynch counter of the lynchee
-	public void lynchPlayer(Player lyncher, String victim){
-		int roomID = lyncher.getRoomIndex();
-		ReadyRoom room = room_mgr.findRoom(roomID);
-		GameSpace game = room.getGameSpace();
-		
-		System.out.println("Lyncher: " + lyncher.getPseudonym().toString());
-		System.out.println("Victim: " + victim);
-		
-		if(game == null){
-			System.out.println("game is NULL");
-		}
-		
-		//game.lynchVote(lyncher, victim);
-		
-		//game.lynchVote(lyncher, game.findPlayer(victim));
-	}
+
 	
     void processUnrestrictedCommands(ClientPacket p, SocketChannel ch) throws IOException
     {
@@ -238,14 +222,7 @@ public class SelectServer
     	
 		room_mgr.processPacket(p, player);
     	switch (p.type)
-    	{	    	
-    		case Vote:
-    			//lynchPlayer(player.getPlayer(), victim);
-	    		String victim = new String(p.data, 0, p.dataSize);
-    			System.out.println(player.getUsername() + " wants to lynch " + victim);
-    			lynchPlayer(player.getPlayer(), victim);
-    			
-    			break;
+    	{
 	    	case ShowState:
 	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
