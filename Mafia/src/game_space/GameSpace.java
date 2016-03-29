@@ -2,6 +2,8 @@ package game_space;
 
 import java.util.Random;
 
+import com.sun.org.apache.bcel.internal.generic.ISUB;
+
 import players.Player;
 import players.PlayerTypes;
 
@@ -126,7 +128,8 @@ public class GameSpace{
 	 * Accepts the victims pseudonym because that is all that should
 	 * be viewable by other players
 	 * */
-	public void lynchVote(Player lyncher, String victimPseudonym) {
+	public boolean lynchVote(Player lyncher, String victimPseudonym) {
+		boolean isVotingSuccessful = false;
 		Player victim = null;
 
 		for(Player current : players){
@@ -135,11 +138,10 @@ public class GameSpace{
 			}
 		}
 		
-		System.out.println("Current State is: " + currentState);
 		if(currentState.equals(gameState.NIGHT)){
-			murderVote(lyncher, victim);
+			isVotingSuccessful = murderVote(lyncher, victim);
 		}else{
-			if (canLynch == true) {
+			if (canLynch == true && victim != null) {
 				if (lynchVictim == null && lynchOngoing == false) {
 					lynchVictim = victim;
 					lynchCount++;
@@ -154,8 +156,12 @@ public class GameSpace{
 					lynchCount++;
 					//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
 				}
+				
+				isVotingSuccessful = true;
 			}
 		}
+		System.out.println("isVotingSuccessful: " + isVotingSuccessful);
+		return isVotingSuccessful;
 	}
 	
 	public Player lynchCheck() {
@@ -167,11 +173,10 @@ public class GameSpace{
 			return null;
 	}
 
-	public void murderVote(Player murderer, Player victim) {
+	public boolean murderVote(Player murderer, Player victim) {
+		boolean isVotingSuccessful = false;		
 		
-		System.out.println("In murderVote");
-		
-		if (canMurder == true && mafioso.contains(murderer) == true) {
+		if (canMurder == true && mafioso.contains(murderer) == true && victim != null) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
 				murderCount++;
@@ -185,7 +190,10 @@ public class GameSpace{
 				murderCount++;
 				//System.out.println(murderer + " has voted to murder " + victim + " ["murderCount "/" players.size() + "]");
 			}
+			isVotingSuccessful = true;
 		}
+		
+		return isVotingSuccessful;
 	}
 	
 	public Player murderCheck() {

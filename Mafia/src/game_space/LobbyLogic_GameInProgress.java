@@ -102,8 +102,11 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				break;
 				
 			case Vote:
-	    		String victim = new String(p.data, 0, p.dataSize);
-    			game.lynchVote(player, victim);
+	    		String victim = new String(p.data, 0, p.dataSize);	    		
+    			if(game.lynchVote(player, victim) == false){
+    				String noSuchPlayer = String.format("User \"" + victim + "\" does not exist");
+    				sendMessageToGroup(noSuchPlayer, player);
+    			}
 				break;
 				
 			default:
