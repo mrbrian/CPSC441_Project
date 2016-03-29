@@ -79,6 +79,18 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 
 	public void sendMessageToGroup(String msg, Player speaker) {
 				
+		ArrayList<Player> observers = room.getObservers();
+		if (observers.contains(speaker))
+		{
+			for (int i = 0; i < observers.size(); i++) {
+				Player player = observers.get(i);
+				
+				ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+				Outbox.sendPacket(p, player.getChannel());
+			}
+			return;	
+		}
+		
 		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
 		for (int i = 0; i < listeners.size(); i++) {

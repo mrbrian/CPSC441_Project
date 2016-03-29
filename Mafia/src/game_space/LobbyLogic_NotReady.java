@@ -28,7 +28,8 @@ public class LobbyLogic_NotReady extends LobbyLogic{
 		switch (p.type)
 		{
 			case StartGame:
-				room.changeState(State.Beginning);
+				if (!room.getObservers().contains(player))
+					room.changeState(State.Beginning);
 				break;
 			default:
 				super.processPacket(p, player);

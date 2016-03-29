@@ -88,6 +88,14 @@ class TCPClient implements Runnable {
 						System.out.println("error with setalias: must provide an alias");
 					}
 					break;
+				case "/observe":
+					if (tokens.length >= 2) {						
+						
+						packet = ClientPacket.observe(Integer.parseInt(tokens[1]));
+					} else {
+						System.out.println("error with observe: must provide a room id");
+					}				
+					break;
 				case "/join":
 					if (tokens.length >= 2) {
 						

@@ -289,8 +289,7 @@ public class GameSpace{
 
 	public int switchTurn(long callTime) {
 		switchTime = callTime - dayTime - nightTime;
-		return updateState(callTime);
-		
+		return updateState(callTime);		
 	}
 
 	public String getChatString(Player player, String msg) {
