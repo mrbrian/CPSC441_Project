@@ -160,6 +160,10 @@ public class GameSpace{
 				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
 			}
 		}
+		
+		System.out.println("canLynch is: " + canLynch);
+		System.out.println("lynch count: " + lynchCount);
+
 	}
 	
 	public Player lynchCheck() {

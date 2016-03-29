@@ -96,13 +96,17 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		{		
 			case Chat:
 				String msg = new String(p.data, 0, p.dataSize);
-				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+				String showStr = String.format("Chat [%s]: %s", player.getPseudonym(), msg); 
 				sendMessageToGroup(showStr, player);
 				System.out.println(showStr);
 				break;
 				
 			case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);
+	    		
+	    		System.out.println("lyncher (in process packet): " + player.getPseudonym().toString());
+	    		System.out.println("lyncher (in process packet): " + victim);
+	    		
     			game.lynchVote(player, victim);
 				break;
 				
