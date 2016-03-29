@@ -89,9 +89,9 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		}
 	}
 
-
 	@Override
 	public void processPacket(ClientPacket p, Player player) {
+		String msgToDisplay;
 
 		switch(p.type)
 			{	
@@ -105,11 +105,30 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 			break;
 			case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);	    		
-				if(game.lynchVote(player, victim) == false){
-					String noSuchPlayer = String.format("User \"" + victim + "\" does not exist");
-					sendMessageToGroup(noSuchPlayer, player);
-				}
-			break;
+    			
+	    		if(game.lynchVote(player, victim) == null){
+    				msgToDisplay = String.format("User \"" + victim + "\" does not exist");
+    				sendMessageToGroup(msgToDisplay, player);
+    			}else{
+	    			int voteCount = 0;
+	    			String voteDescriptor = "";
+	    			
+	    			if(game.isDay() == true){
+	    				voteCount = game.getLynchCount();
+	    				voteDescriptor = " Lynch count on " + game.getCurrentVictim().getPseudonym().toString() + " : ";
+	    			}else{
+	    				voteCount = game.getMurderCount();
+	    				voteDescriptor = " Murder count: " + game.getCurrentVictim().getPseudonym().toString() + " : ";
+	    			}
+    				
+	    			msgToDisplay = "\"" + player.getPseudonym().toString() + 
+	    					"\" has voted for \"" + victim + " ---- " + 
+	    					voteDescriptor + voteCount;
+	    			
+    				sendMessageToGroup(msgToDisplay, player);
+    			}
+    			
+				break;
 			case Join:
 			case Leave:
 			{

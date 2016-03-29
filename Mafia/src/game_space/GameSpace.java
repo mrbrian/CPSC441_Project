@@ -122,12 +122,10 @@ public class GameSpace{
 		return false;
 	}
 	
-	/*
-	 * Accepts the victims pseudonym because that is all that should
+	/* Accepts the victims pseudonym because that is all that should
 	 * be viewable by other players
 	 * */
-	public boolean lynchVote(Player lyncher, String victimPseudonym) {
-		boolean isVotingSuccessful = false;
+	public Player lynchVote(Player lyncher, String victimPseudonym) {
 		Player victim = null;
 
 		for(Player current : players){
@@ -137,7 +135,7 @@ public class GameSpace{
 		}
 		
 		if(currentState.equals(gameState.NIGHT)){
-			isVotingSuccessful = murderVote(lyncher, victim);
+			victim = murderVote(lyncher, victim);
 		}else{
 			if (canLynch == true && victim != null) {
 				if (lynchVictim == null && lynchOngoing == false) {
@@ -154,12 +152,9 @@ public class GameSpace{
 					lynchCount++;
 					//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
 				}
-				
-				isVotingSuccessful = true;
 			}
 		}
-		System.out.println("isVotingSuccessful: " + isVotingSuccessful);
-		return isVotingSuccessful;
+		return victim;
 	}
 	
 	public Player lynchCheck() {
@@ -171,9 +166,7 @@ public class GameSpace{
 			return null;
 	}
 
-	public boolean murderVote(Player murderer, Player victim) {
-		boolean isVotingSuccessful = false;		
-		
+	public Player murderVote(Player murderer, Player victim) {		
 		if (canMurder == true && mafioso.contains(murderer) == true && victim != null) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
@@ -188,10 +181,9 @@ public class GameSpace{
 				murderCount++;
 				//System.out.println(murderer + " has voted to murder " + victim + " ["murderCount "/" players.size() + "]");
 			}
-			isVotingSuccessful = true;
 		}
 		
-		return isVotingSuccessful;
+		return victim;
 	}
 	
 	public Player murderCheck() {
@@ -265,6 +257,34 @@ public class GameSpace{
 		mafioso.remove(player);
 		innocent.remove(player);		
 	}
+	
+	public int getNumOfPlayers(){
+		return players.size();
+	}	
+	
+	public int getLynchCount(){
+		return lynchCount;
+	}
+	
+	public int getMurderCount(){
+		return murderCount;
+	}
+	
+	public boolean isDay(){
+		if(currentState.equals(gameState.DAY)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public Player getCurrentVictim(){
+		if(currentState.equals(gameState.DAY)){
+			return lynchVictim; 
+		}else{
+			return murderVictim;
+		}
+	}
 
 
 	public int switchTurn(long callTime) {
@@ -284,6 +304,6 @@ public class GameSpace{
 			result = String.format("(Game Chat) [%s]: %s", player.getPseudonym(), msg);
 		
 		return result;
-	}	
+	}
 }
 
