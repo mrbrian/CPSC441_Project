@@ -1,7 +1,13 @@
 package game_space;
 
 import client.ClientPacket;
+import client.packets.ClientInvitePacket;
+import client.packets.ClientJoinPacket;
 import players.Player;
+import server.Outbox;
+import server.PlayerManager;
+import server.ServerPacket;
+import server.ServerPacket.PacketType;
 
 public abstract class LobbyLogic {
 
@@ -33,6 +39,23 @@ public abstract class LobbyLogic {
 				player.leaveRoom();				
 			}
 			break;
+			case Invite:
+			{
+				String inviteStr = String.format("%s has sent you an invite!  Enter \"/accept\" to join them.", player.getUsername());
+				ClientInvitePacket cip = new ClientInvitePacket(p);
+				
+				ClientJoinPacket sendJoin = ClientPacket.join(room.getId());
+				
+				ServerPacket out_pkt = new ServerPacket(PacketType.InviteNotify, inviteStr, sendJoin.toBytes()); 
+
+				Player target = PlayerManager.findPlayerByName(cip.invited);				
+				Outbox.sendPacket(out_pkt, target.getChannel());
+				player.leaveRoom();				
+			}
+			break;
+			default:
+				Outbox.sendMessage(String.format("Bad room command: %s", p.type.toString()), player.getChannel());
+				break;
 		}
 	}
 }

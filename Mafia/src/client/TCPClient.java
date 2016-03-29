@@ -13,6 +13,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 
 import client.ClientPacket.PacketType;
+import client.packets.ClientJoinPacket;
 import server.ServerPacket; 
 
 class TCPClient implements Runnable {
@@ -20,6 +21,7 @@ class TCPClient implements Runnable {
 	Thread thread;
 	boolean terminate;
     Socket clientSocket; 
+    byte[] lastInviteData;
     
     public TCPClient (String args[]){
 
@@ -35,17 +37,21 @@ class TCPClient implements Runnable {
         }       	                 
     }
     
-	public static void processPacket(ServerPacket p)
+	public void processPacket(ServerPacket p)
 	{		
 		switch (p.pType)
-		{			
+		{
+			case InviteNotify:				
+				lastInviteData = p.data;
+				System.out.println(String.format("%s", p.msg));				
+				break;
 			default:
 				System.out.println(String.format("%s", p.msg));	            
 				break;
 		}	
 	}
 	
-	public static void parseCommand(String input, DataOutputStream outBuffer) throws IOException
+	public void parseCommand(String input, DataOutputStream outBuffer) throws IOException
 	{
 		String delims = "[ ]+";
 		String[] tokens = input.split(delims);
@@ -137,6 +143,18 @@ class TCPClient implements Runnable {
 				case "/switchturn":
 					packet = new ClientPacket(PacketType.SwitchTurn, new byte[]{});
 					break;
+				case "/accept":
+					
+					if (lastInviteData != null)
+					{
+						System.out.println("Accepting invite...");
+						sendData(lastInviteData, outBuffer);
+					}
+					else
+						System.out.println("error: there was no invite to accept");
+					
+					lastInviteData = null;
+					break;
 				default:
 					System.out.println("Not a vaild command");
 					break;
@@ -150,7 +168,18 @@ class TCPClient implements Runnable {
 		}		
 	}
 	
-    static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException
+    private void sendData(byte[] data, DataOutputStream outBuffer) {
+    	try
+    	{
+    		outBuffer.write(data);
+    	}
+    	catch (IOException e)
+    	{
+    		System.out.println("sendData err: " + e.getMessage());
+    	}
+	}
+
+	static void sendPacket(ClientPacket p, DataOutputStream outBuffer) throws IOException
     {
     	int size = p.getPacketSize();
     	ByteBuffer buf = ByteBuffer.allocateDirect(size);

@@ -209,8 +209,11 @@ public class SelectServer
 	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
     		default:
-    			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
-    			Outbox.sendMessage(String.format("Could not process command: %s",  p.type.toString()), ch);
+	    		{
+	    			String str = String.format("Could not process command: %s, %s",  p.type.toString(), ch.toString());
+	    			System.out.println(str);
+	    			Outbox.sendMessage(str, ch);
+	    		}
     			break;
     	}
     }
@@ -305,7 +308,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	        	    		Outbox.sendMessage("Welcome!", cchannel);                    
+	        	    		Outbox.sendMessage("Welcome!\nCommands: \"/login <user> <pwd>\" or \"/createaccount <user> <pwd>\"", cchannel);                    
 	                    } 
 	                    else 
 	                    {
