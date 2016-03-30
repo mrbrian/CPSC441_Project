@@ -28,7 +28,7 @@ public class ReadyRoom{
 	private LobbyLogic logic;
 	private State state;
 	
-	private static final int NUM_PLAYERS_REQ_DEFAULT = 2;
+	private static final int NUM_PLAYERS_REQ_DEFAULT = 4;
 	//playerList is 2-tuple string of (IP,pseudonym)
 	private ArrayList<Player> playerList;
 	private ArrayList<Player> observerList;

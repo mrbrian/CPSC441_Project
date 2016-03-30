@@ -154,6 +154,8 @@ public class GameSpace{
 				}
 			}
 		}
+		
+		System.out.println("Victim is: " + victim.getPseudonym().toString());
 		return victim;
 	}
 	
@@ -268,6 +270,11 @@ public class GameSpace{
 	
 	public int getMurderCount(){
 		return murderCount;
+	}
+	
+	public void resetVoteCounter(){
+		lynchCount = 0;
+		murderCount = 0;
 	}
 	
 	public boolean isDay(){

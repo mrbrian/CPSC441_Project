@@ -93,17 +93,21 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		
 		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
-		for (int i = 0; i < listeners.size(); i++) {
-			Player player = listeners.get(i);
-			
-			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
-			Outbox.sendPacket(p, player.getChannel());
+		if(listeners != null){
+			for (int i = 0; i < listeners.size(); i++) {
+				Player player = listeners.get(i);
+				
+				ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+				Outbox.sendPacket(p, player.getChannel());
+			}
 		}
 	}
 
 	@Override
 	public void processPacket(ClientPacket p, Player player) {
 		String msgToDisplay;
+		
+		System.out.println("player is: " + player.getPseudonym().toString());
 
 		switch(p.type)
 			{	
@@ -131,7 +135,6 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 	    					msgToDisplay = "\"" + victim + "\" has been lynched successfully";
 	    					sendMessageToGroup(msgToDisplay, player);
 	    					killSuccess = true;
-		    				game.voteReset();
 	    				}	    				
 	    				if(!killSuccess){
 		    				voteCount = game.getLynchCount();
@@ -143,11 +146,10 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 	    					msgToDisplay = "\"" + victim + "\" has been murdered successfully";
 	    					sendMessageToGroup(msgToDisplay, player);
 	    					killSuccess = true;
-		    				game.voteReset();
 	    				}	    				
 	    				if(!killSuccess){
 		    				voteCount = game.getMurderCount();
-		    				voteDescriptor = " Murder count: " + game.getCurrentVictim().getPseudonym().toString() + " : ";	
+		    				voteDescriptor = " Murder count: " + victim + " : ";	
 	    				}
 	    			}
     				
@@ -156,7 +158,17 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		    					"\" has voted for \"" + victim + "\" ---- " + 
 		    					voteDescriptor + voteCount;
 	    			}else{
+	    				
+	    				// ***** ISSUE MIGHT BE HERE ******
 	    				msgToDisplay = "";
+	    				if(game.isDay()){
+	    					game.nextNight();
+	    				}else{
+	    					game.nextDay();
+	    				}
+	    				
+	    				System.out.println("isDay: " + game.isDay());
+	    				//game.resetVoteCounter();
 	    			}
 	    			
     				sendMessageToGroup(msgToDisplay, player);
