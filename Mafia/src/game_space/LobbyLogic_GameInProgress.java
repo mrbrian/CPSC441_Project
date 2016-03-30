@@ -105,29 +105,50 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 			break;
 			case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);	    		
-    			
+	    		
 	    		if(game.lynchVote(player, victim) == null){
     				msgToDisplay = String.format("User \"" + victim + "\" does not exist");
     				sendMessageToGroup(msgToDisplay, player);
     			}else{
 	    			int voteCount = 0;
 	    			String voteDescriptor = "";
+	    			boolean killSuccess = false;
 	    			
 	    			if(game.isDay() == true){
-	    				voteCount = game.getLynchCount();
-	    				voteDescriptor = " Lynch count on " + game.getCurrentVictim().getPseudonym().toString() + " : ";
+	    				if(game.lynchCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been lynched successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+		    				game.voteReset();
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getLynchCount();
+		    				voteDescriptor = " Lynch count on " + victim + " : ";
+	    				}
+
 	    			}else{
-	    				voteCount = game.getMurderCount();
-	    				voteDescriptor = " Murder count: " + game.getCurrentVictim().getPseudonym().toString() + " : ";
+	    				if(game.murderCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been murdered successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+		    				game.voteReset();
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getMurderCount();
+		    				voteDescriptor = " Murder count: " + game.getCurrentVictim().getPseudonym().toString() + " : ";	
+	    				}
 	    			}
     				
-	    			msgToDisplay = "\"" + player.getPseudonym().toString() + 
-	    					"\" has voted for \"" + victim + " ---- " + 
-	    					voteDescriptor + voteCount;
+	    			if(!killSuccess){
+		    			msgToDisplay = "\"" + player.getPseudonym().toString() + 
+		    					"\" has voted for \"" + victim + "\" ---- " + 
+		    					voteDescriptor + voteCount;
+	    			}else{
+	    				msgToDisplay = "";
+	    			}
 	    			
     				sendMessageToGroup(msgToDisplay, player);
-    			}
-    			
+    			}	    		
 				break;
 			case Join:
 			case Leave:
