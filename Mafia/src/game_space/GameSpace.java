@@ -23,10 +23,10 @@ public class GameSpace{
 	private long switchTime = 0;
 	private long voteBegin = 0;
 	
-	private ArrayList<Player> players;
-	private ArrayList<Player> innocent;
-	private ArrayList<Player> mafioso;
-	private ArrayList<Player> graveyard;
+	private ArrayList<Player> players = null;
+	private ArrayList<Player> innocent = null;
+	private ArrayList<Player> mafioso = null;
+	private ArrayList<Player> graveyard = null;
 	private int mafiaFraction = 3;			//fraction = 1/mafiaFraction
 	private enum gameState {DAY, NIGHT};
 	private gameState currentState = gameState.DAY;
@@ -122,21 +122,18 @@ public class GameSpace{
 		return false;
 	}
 	
-	/*
-	 * Accepts the victims pseudonym because that is all that should
+	/* Accepts the victims pseudonym because that is all that should
 	 * be viewable by other players
 	 * */
-	public void lynchVote(Player lyncher, String victimPseudonym) {
+	public Player lynchVote(Player lyncher, String victimPseudonym) {
 		Player victim = null;
-		
-		System.out.println("Lyncher is (outside): " + lyncher.getPseudonym().toString());
-		System.out.println("Victim is (outside): " + victimPseudonym);
-		
+
 		for(Player current : players){
-			System.out.println("Current Players: " + current.getPseudonym().toString());
 			if(current.getPseudonym().toString().equals(victimPseudonym)){
 				victim = current;
 			}
+			if(victim == null)
+				return null;
 		}
 		
 		if (canLynch == true) {
@@ -158,8 +155,33 @@ public class GameSpace{
 			else {
 				lynchCount++;
 				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+
+		if(currentState.equals(gameState.NIGHT)){
+			victim = murderVote(lyncher, victim);
+		}
+		else{
+			if (canLynch == true && victim != null) {
+				if (lynchVictim == null && lynchOngoing == false) {
+					lynchVictim = victim;
+					lynchCount++;
+					lynchOngoing = true;
+					
+					//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+				}
+				else if (victim != lynchVictim && lynchOngoing == true) {
+					//System.out.println("Only one lynch vote may be ongoing at a time");
+				}
+				else {
+					lynchCount++;
+					//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+				}
 			}
 		}
+
+			}
+		}
+		System.out.println("Victim is: " + victim.getPseudonym().toString());
+		return victim;
 	}
 	
 	public Player lynchCheck() {
@@ -171,8 +193,8 @@ public class GameSpace{
 			return null;
 	}
 
-	public void murderVote(Player murderer, Player victim) {
-		if (canMurder == true && mafioso.contains(murderer) == true) {
+	public Player murderVote(Player murderer, Player victim) {		
+		if (canMurder == true && mafioso.contains(murderer) == true && victim != null) {
 			if (murderVictim == null && murderOngoing == false) {
 				murderVictim = victim;
 				murderCount++;
@@ -187,6 +209,8 @@ public class GameSpace{
 				//System.out.println(murderer + " has voted to murder " + victim + " ["murderCount "/" players.size() + "]");
 			}
 		}
+		
+		return victim;
 	}
 	
 	public Player murderCheck() {
@@ -227,30 +251,15 @@ public class GameSpace{
 	public ArrayList <Player> whoCanChatWith(Player speaker) {	
 		ArrayList<Player> listeners = null;
 		
-		if(speaker == null){
-			System.out.println("speaker is NULL");
-		}else{
-			System.out.println("speaker is NOT NULL");
-			
-		}
-		
-		if(graveyard == null){
-			System.out.println("graveyard is NULL");
-		}else{
-			System.out.println("graveyard is NOT NULL");
-			
-		}
-		
-		if (speaker.getIsAlive() == false && graveyard.size() > 1)
+		if (speaker.getIsAlive() == false && graveyard.size() > 0)
 			listeners = graveyard;
 		
-		if (currentState == gameState.DAY)
+		else if (currentState == gameState.DAY)
 			listeners = players;
 		
-		if (mafioso.contains(speaker) && currentState == gameState.NIGHT)
+		else if (mafioso.contains(speaker) && currentState == gameState.NIGHT)
 			listeners = mafioso;
 		
-		//listeners.remove(speaker);
 		return listeners;
 	}
 
@@ -261,4 +270,57 @@ public class GameSpace{
 		innocent.remove(player);		
 	}
 	
+	public int getNumOfPlayers(){
+		return players.size();
+	}	
+	
+	public int getLynchCount(){
+		return lynchCount;
+	}
+	
+	public int getMurderCount(){
+		return murderCount;
+	}
+	
+	public void resetVoteCounter(){
+		lynchCount = 0;
+		murderCount = 0;
+	}
+	
+	public boolean isDay(){
+		if(currentState.equals(gameState.DAY)){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public Player getCurrentVictim(){
+		if(currentState.equals(gameState.DAY)){
+			return lynchVictim; 
+		}else{
+			return murderVictim;
+		}
+	}
+
+
+	public int switchTurn(long callTime) {
+		switchTime = callTime - dayTime - nightTime;
+		return updateState(callTime);
+		
+	}
+
+	public String getChatString(Player player, String msg) {
+		String result = "Chat";
+		
+		if (currentState == gameState.NIGHT && mafioso.contains(player))
+			result = String.format("(Mafia Only) [%s]: %s", player.getPseudonym(), msg);
+		else if (graveyard.contains(player))
+			result = String.format("(Dead Chat) [%s]: %s", player.getPseudonym(), msg);
+		else 
+			result = String.format("(Game Chat) [%s]: %s", player.getPseudonym(), msg);
+		
+		return result;
+	}
 }
+

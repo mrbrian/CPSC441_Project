@@ -120,7 +120,7 @@ public class UnitTests {
 		int expected = 1;				
 		
 		RoomManager roomManager = new RoomManager(null);
-		roomManager.open(0);
+		roomManager.create(0);
 		
 		
 		ReadyRoom room = roomManager.findRoom(0);		
@@ -142,7 +142,7 @@ public class UnitTests {
 		
 		
 		
-		roomManager.open(1);
+		roomManager.create(1);
 		
 		
 		ReadyRoom room2 = roomManager.findRoom(1);

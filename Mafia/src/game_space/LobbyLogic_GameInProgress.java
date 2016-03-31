@@ -81,33 +81,109 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				
 		ArrayList<Player> listeners = game.whoCanChatWith(speaker);
 		
-		for (int i = 0; i < listeners.size(); i++) {
-			Player player = listeners.get(i);
-			
-			ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
-			Outbox.sendPacket(p, player.getChannel());
+		if(listeners != null){
+			for (int i = 0; i < listeners.size(); i++) {
+				Player player = listeners.get(i);
+				
+				ServerPacket p = new ServerPacket(ServerPacket.PacketType.ServerMessage, msg, new byte[] {});
+				Outbox.sendPacket(p, player.getChannel());
+			}
 		}
 	}
-	
+
 	@Override
 	public void processPacket(ClientPacket p, Player player) {
+		String msgToDisplay;
+		
+		System.out.println("player is: " + player.getPseudonym().toString());
 
 		switch(p.type)
-		{		
+			{	
 			case Chat:
-				String msg = new String(p.data, 0, p.dataSize);
-				String showStr = String.format("Chat [%s]: %s", player.getPseudonym(), msg); 
+			{
+				String msg = new String(p.data, 0, p.dataSize);				
+				String showStr = game.getChatString(player, msg);
 				sendMessageToGroup(showStr, player);
 				System.out.println(showStr);
-				break;
-				
+			}
+			break;
 			case Vote:
-	    		String victim = new String(p.data, 0, p.dataSize);
-    			game.lynchVote(player, victim);
+	    		String victim = new String(p.data, 0, p.dataSize);	    		
+	    		
+	    		if(game.lynchVote(player, victim) == null){
+
+    				msgToDisplay = String.format("User \"" + victim + "\" does not exist");
+	    			Outbox.sendMessage(msgToDisplay, player.getChannel());
+    				//sendMessageToGroup(msgToDisplay, player);
+    			}else{
+	    			int voteCount = 0;
+	    			String voteDescriptor = "";
+	    			boolean killSuccess = false;
+	    			
+	    			if(game.isDay() == true){
+	    				if(game.lynchCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been lynched successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getLynchCount();
+		    				voteDescriptor = " Lynch count on " + victim + " : ";
+	    				}
+
+	    			}else{
+	    				if(game.murderCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been murdered successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getMurderCount();
+		    				voteDescriptor = " Murder count: " + victim + " : ";	
+	    				}
+	    			}
+    				
+	    			if(!killSuccess){
+		    			msgToDisplay = "\"" + player.getPseudonym().toString() + 
+		    					"\" has voted for \"" + victim + "\" ---- " + 
+		    					voteDescriptor + voteCount;
+	    			}else{
+	    				
+	    				// ***** ISSUE MIGHT BE HERE ******
+	    				msgToDisplay = "";
+	    				if(game.isDay()){
+	    					game.nextNight();
+	    				}else{
+	    					game.nextDay();
+	    				}
+	    				
+	    				System.out.println("isDay: " + game.isDay());
+	    				//game.resetVoteCounter();
+	    			}
+	    			
+    				sendMessageToGroup(msgToDisplay, player);
+    			}	    		
 				break;
-				
-			default:
-				break;
+			case Join:
+			case Leave:
+			{
+				String showStr = "You can't leave while a game is in progress!"; 
+				Outbox.sendMessage(showStr, player.getChannel());
+			}
+			break;
+			case SwitchTurn:
+			{
+				Date currTime = new Date();
+				int currState = game.switchTurn(currTime.getTime());
+				if (currState == 1) {
+					Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());					
+				}
+				else if (currState == 0) {
+					Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());					
+				}				
+			}
+			break;
 		}		
+
 	}
 }
