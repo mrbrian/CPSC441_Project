@@ -96,7 +96,7 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		{		
 			case Chat:
 				String msg = new String(p.data, 0, p.dataSize);
-				String showStr = String.format("Chat [%s]: %s", player.getUsername(), msg); 
+				String showStr = String.format("Chat [%s]: %s", player.getPseudonym(), msg); 
 				sendMessageToGroup(showStr, player);
 				System.out.println(showStr);
 				break;

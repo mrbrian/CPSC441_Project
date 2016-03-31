@@ -146,7 +146,7 @@ public class GameSpace{
 				lynchOngoing = true;
 				
 				System.out.println("lyncher is: " + lyncher.getPseudonym().toString());
-				System.out.println("victim is: " + victim.getPseudonym().toString());
+				System.out.println("victim is: " + lynchVictim.getPseudonym().toString());
 				
 				System.out.println("lynch count: " + lynchCount);
 				
