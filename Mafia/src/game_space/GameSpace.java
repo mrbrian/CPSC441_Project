@@ -23,10 +23,10 @@ public class GameSpace{
 	private long switchTime = 0;
 	private long voteBegin = 0;
 	
-	private ArrayList<Player> players;
-	private ArrayList<Player> innocent;
-	private ArrayList<Player> mafioso;
-	private ArrayList<Player> graveyard;
+	private ArrayList<Player> players = null;
+	private ArrayList<Player> innocent = null;
+	private ArrayList<Player> mafioso = null;
+	private ArrayList<Player> graveyard = null;
 	private int mafiaFraction = 3;			//fraction = 1/mafiaFraction
 	private enum gameState {DAY, NIGHT};
 	private gameState currentState = gameState.DAY;
@@ -121,22 +121,54 @@ public class GameSpace{
 		}
 		return false;
 	}
+	public Player checkVictim(String victimPseudonym) {
+		Player victim = null;
+		for(Player current : players){
+			if(current.getPseudonym().toString().equals(victimPseudonym))
+				victim = current;
+		}
+		return victim;
+	}
+	
 	
 	/* Accepts the victims pseudonym because that is all that should
 	 * be viewable by other players
 	 * */
-	public Player lynchVote(Player lyncher, String victimPseudonym) {
+	/*public Player lynchVote(Player lyncher, String victimPseudonym) {
 		Player victim = null;
 
 		for(Player current : players){
 			if(current.getPseudonym().toString().equals(victimPseudonym)){
 				victim = current;
 			}
+			if(victim == null)
+				return null;
 		}
 		
+		if (canLynch == true) {
+			if (lynchVictim == null && lynchOngoing == false) {
+				lynchVictim = victim;
+				lynchCount++;
+				lynchOngoing = true;
+				
+				System.out.println("lyncher is: " + lyncher.getPseudonym().toString());
+				System.out.println("victim is: " + lynchVictim.getPseudonym().toString());
+				
+				System.out.println("lynch count: " + lynchCount);
+				
+				//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+			}
+			else if (victim != lynchVictim && lynchOngoing == true) {
+				//System.out.println("Only one lynch vote may be ongoing at a time");
+			}
+			else {
+				lynchCount++;
+				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+
 		if(currentState.equals(gameState.NIGHT)){
 			victim = murderVote(lyncher, victim);
-		}else{
+		}
+		else{
 			if (canLynch == true && victim != null) {
 				if (lynchVictim == null && lynchOngoing == false) {
 					lynchVictim = victim;
@@ -154,7 +186,44 @@ public class GameSpace{
 				}
 			}
 		}
-		
+
+			}
+		}
+		System.out.println("Victim is: " + victim.getPseudonym().toString());
+		return victim;
+	}
+	
+	public Player lynchCheck() {
+		if (lynchCount > (players.size()/2)) {
+			kill(lynchVictim);
+			return lynchVictim;
+		}
+		else
+			return null;
+	}*/
+	
+	public Player lynchVote(Player lyncher, Player victim) {		
+		if (canLynch == true) {
+			if (lynchVictim == null && lynchOngoing == false) {
+				lynchVictim = victim;
+				lynchCount++;
+				lynchOngoing = true;
+				
+				//System.out.println("lyncher is: " + lyncher.getPseudonym().toString());
+				//System.out.println("victim is: " + lynchVictim.getPseudonym().toString());
+				
+				//System.out.println("lynch count: " + lynchCount);
+				
+				//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+			}
+			else if (victim != lynchVictim && lynchOngoing == true) {
+				//System.out.println("Only one lynch vote may be ongoing at a time");
+			}
+			else {
+				lynchCount++;
+				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+			}
+		}
 		System.out.println("Victim is: " + victim.getPseudonym().toString());
 		return victim;
 	}
@@ -226,30 +295,15 @@ public class GameSpace{
 	public ArrayList <Player> whoCanChatWith(Player speaker) {	
 		ArrayList<Player> listeners = null;
 		
-		if(speaker == null){
-			System.out.println("speaker is NULL");
-		}else{
-			System.out.println("speaker is NOT NULL");
-			
-		}
-		
-		if(graveyard == null){
-			System.out.println("graveyard is NULL");
-		}else{
-			System.out.println("graveyard is NOT NULL");
-			
-		}
-		
-		if (speaker.getIsAlive() == false && graveyard.size() > 1)
+		if (speaker.getIsAlive() == false && graveyard.size() > 0)
 			listeners = graveyard;
 		
-		if (currentState == gameState.DAY)
+		else if (currentState == gameState.DAY)
 			listeners = players;
 		
-		if (mafioso.contains(speaker) && currentState == gameState.NIGHT)
+		else if (mafioso.contains(speaker) && currentState == gameState.NIGHT)
 			listeners = mafioso;
 		
-		//listeners.remove(speaker);
 		return listeners;
 	}
 

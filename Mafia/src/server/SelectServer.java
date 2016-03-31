@@ -100,6 +100,7 @@ public class SelectServer
 	    		ClientLoginPacket clp = new ClientLoginPacket(p);	    		
 	    		// update player info		
     			player.setUsername(clp.username);
+    			player.setPseudonym(clp.username);
     			
     			if(saveInfo.checkCredentials(clp.username, clp.password)){
     				plyr_mgr.login(player);
@@ -131,6 +132,7 @@ public class SelectServer
 	    	case SetAlias:
 	    		String pseudo = new String(p.data, 0, p.dataSize);
     			player.setPseudonym(pseudo);
+    			Outbox.sendMessage("Alias set to: " + pseudo, ch);
 	    		break;
 
 	    	case Observe:

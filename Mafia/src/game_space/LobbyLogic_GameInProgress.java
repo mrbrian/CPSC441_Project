@@ -119,12 +119,14 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				System.out.println(showStr);
 			}
 			break;
-			case Vote:
+			/*case Vote:
 	    		String victim = new String(p.data, 0, p.dataSize);	    		
 	    		
 	    		if(game.lynchVote(player, victim) == null){
+
     				msgToDisplay = String.format("User \"" + victim + "\" does not exist");
-    				sendMessageToGroup(msgToDisplay, player);
+	    			Outbox.sendMessage(msgToDisplay, player.getChannel());
+    				//sendMessageToGroup(msgToDisplay, player);
     			}else{
 	    			int voteCount = 0;
 	    			String voteDescriptor = "";
@@ -173,6 +175,72 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 	    			
     				sendMessageToGroup(msgToDisplay, player);
     			}	    		
+				break;*/
+			
+			case Vote:
+	    		String victim = new String(p.data, 0, p.dataSize);	    		
+	    		Player victimPlayer = game.checkVictim(victim);
+	    		if(victimPlayer == null){
+
+    				msgToDisplay = String.format("User \"" + victim + "\" does not exist");
+	    			Outbox.sendMessage(msgToDisplay, player.getChannel());
+    				//sendMessageToGroup(msgToDisplay, player);
+    			}
+	    		else{
+	    			int voteCount = 0;
+	    			String voteDescriptor = "";
+	    			boolean killSuccess = false;
+	    			
+	    			if(game.isDay() == true){
+	    				game.lynchVote(player, victimPlayer);
+	    				if(game.lynchCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been lynched successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getLynchCount();
+		    				voteDescriptor = " Lynch count on " + victim + " : ";
+	    				}
+	    			}
+	    			else{
+	    				game.murderVote(player, victimPlayer);
+	    				if(game.murderCheck() != null){
+	    					msgToDisplay = "\"" + victim + "\" has been murdered successfully";
+	    					sendMessageToGroup(msgToDisplay, player);
+	    					killSuccess = true;
+	    				}	    				
+	    				if(!killSuccess){
+		    				voteCount = game.getMurderCount();
+		    				voteDescriptor = " Murder count: " + victim + " : ";	
+	    				}
+	    			}
+    				
+	    			if(!killSuccess){
+		    			msgToDisplay = "\"" + player.getPseudonym().toString() + 
+		    					"\" has voted for \"" + victim + "\" ---- " + 
+		    					voteDescriptor + voteCount;
+	    			}
+	    			else{
+	    				
+	    				// ***** ISSUE MIGHT BE HERE ******
+	    				msgToDisplay = "";
+	    				if(game.isDay()) {
+	    					Outbox.sendMessage("+++The day ends in bloodshed... +++", room.getSocketChannelList());
+	    					Outbox.sendMessage("~~~~~~Night descends...~~~~~~~", room.getSocketChannelList());
+	    					game.nextNight();
+	    				}else{
+	    					Outbox.sendMessage("+++A bump in the night...+++ ", room.getSocketChannelList());
+	    					Outbox.sendMessage("******A new day begins...******", room.getSocketChannelList());
+	    					game.nextDay();
+	    				}
+	    				
+	    				System.out.println("isDay: " + game.isDay());
+	    				//game.resetVoteCounter();
+	    			}
+	    			
+    				sendMessageToGroup(msgToDisplay, player);
+    			}	    		
 				break;
 			case Join:
 			case Leave:
@@ -194,5 +262,6 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 			}
 			break;
 		}		
+
 	}
 }
