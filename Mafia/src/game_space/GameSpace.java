@@ -121,11 +121,20 @@ public class GameSpace{
 		}
 		return false;
 	}
+	public Player checkVictim(String victimPseudonym) {
+		Player victim = null;
+		for(Player current : players){
+			if(current.getPseudonym().toString().equals(victimPseudonym))
+				victim = current;
+		}
+		return victim;
+	}
+	
 	
 	/* Accepts the victims pseudonym because that is all that should
 	 * be viewable by other players
 	 * */
-	public Player lynchVote(Player lyncher, String victimPseudonym) {
+	/*public Player lynchVote(Player lyncher, String victimPseudonym) {
 		Player victim = null;
 
 		for(Player current : players){
@@ -178,6 +187,41 @@ public class GameSpace{
 			}
 		}
 
+			}
+		}
+		System.out.println("Victim is: " + victim.getPseudonym().toString());
+		return victim;
+	}
+	
+	public Player lynchCheck() {
+		if (lynchCount > (players.size()/2)) {
+			kill(lynchVictim);
+			return lynchVictim;
+		}
+		else
+			return null;
+	}*/
+	
+	public Player lynchVote(Player lyncher, Player victim) {		
+		if (canLynch == true) {
+			if (lynchVictim == null && lynchOngoing == false) {
+				lynchVictim = victim;
+				lynchCount++;
+				lynchOngoing = true;
+				
+				//System.out.println("lyncher is: " + lyncher.getPseudonym().toString());
+				//System.out.println("victim is: " + lynchVictim.getPseudonym().toString());
+				
+				//System.out.println("lynch count: " + lynchCount);
+				
+				//System.out.println(lyncher + " has begun a vote to lynch " + victim + " ["lynchCount "/" players.size() + "]");
+			}
+			else if (victim != lynchVictim && lynchOngoing == true) {
+				//System.out.println("Only one lynch vote may be ongoing at a time");
+			}
+			else {
+				lynchCount++;
+				//System.out.println(lyncher + " has voted to lynch " + victim + " ["lynchCount "/" players.size() + "]");
 			}
 		}
 		System.out.println("Victim is: " + victim.getPseudonym().toString());
