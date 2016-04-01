@@ -21,6 +21,7 @@ import game_space.ReadyRoom.State;
 import players.Player;
 import players.Player.PlayerState;
 import server.FileIO;
+import server.ServerPacket.PacketType;
 
 public class SelectServer 
 {
@@ -212,18 +213,12 @@ public class SelectServer
 	    		break;
 
 	    	case Logout:
-	    		Outbox.sendMessage("Goodbye!", player.getChannel());
-
-	    		int roomID = player.getRoomIndex();
-	    		
-	    		if (roomID != -1) {  //then in a game
-	    			room = room_mgr.findRoom(roomID);
-	    			GameSpace game = room.getGameSpace();
-	    			game.removePlayer(player);	    			
-	    		}
-	    		//now remove player from the player manager
-	    		plyr_mgr.removePlayer(player);
-	    		player.getChannel().socket().close();
+		    	{
+		    		ServerPacket p1 = new ServerPacket(PacketType.Disconnect, "Goodbye!", new byte[]{});
+		    		Outbox.sendPacket(p1, player.getChannel());
+	
+		    		plyr_mgr.logout(player);		    		
+		    	}
 	    		break;
 
 	    	case ListUsers:
@@ -366,15 +361,15 @@ public class SelectServer
 	                            	int bytesRecv = cchannel.read(inBuffer);
 		                            if (bytesRecv <= 0)
 		                            {
-		                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));		                                
-		                            	plyr_mgr.disconnect(p);
+		                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));		 
+	                            		plyr_mgr.disconnect(p);
 		                                key.cancel();  // deregister the socket
 		                                continue;
 		                            }
 	                            }
 	                            catch(Exception e)
 	                            {
-	                            	plyr_mgr.disconnect(p);
+                            		plyr_mgr.disconnect(p);
 	                                System.out.println("Canceling..");
 	                                
 	                                key.cancel();  // deregister the socket	                            	
