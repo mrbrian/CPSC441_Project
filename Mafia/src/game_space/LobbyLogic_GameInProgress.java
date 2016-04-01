@@ -62,7 +62,7 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		
 		}
 		
-		/*win = game.checkWin();
+		win = game.checkWin();
 		if (win != -1) {
 			if (win == 0) {
 				Outbox.sendMessage("---The innocent have killed the last Mafioso, returning peace to their town!---", room.getSocketChannelList());
@@ -74,7 +74,7 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 				Outbox.sendMessage("+++GAME OVER+++", room.getSocketChannelList());
 				room.changeState(State.GameOver);
 			}
-		}*/
+		}
 	}
 
 	public void sendMessageToGroup(String msg, Player speaker) {
