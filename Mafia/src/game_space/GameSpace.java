@@ -293,16 +293,20 @@ public class GameSpace{
 	
 	//returns an ArrayList of players with whom the player can speak based on current state, less the player
 	public ArrayList <Player> whoCanChatWith(Player speaker) {	
-		ArrayList<Player> listeners = null;
+		ArrayList<Player> listeners = new ArrayList<Player>();
 		
-		if (speaker.getIsAlive() == false && graveyard.size() > 0)
-			listeners = graveyard;
+		if (speaker.getIsAlive() == false)
+			listeners.addAll(graveyard);
 		
-		else if (currentState == gameState.DAY)
-			listeners = players;
+		else if (currentState == gameState.DAY) {
+			listeners.addAll(players);
+			listeners.addAll(graveyard);
+		}
 		
-		else if (mafioso.contains(speaker) && currentState == gameState.NIGHT)
-			listeners = mafioso;
+		else if (mafioso.contains(speaker) && currentState == gameState.NIGHT) {
+			listeners.addAll(mafioso);
+			listeners.addAll(graveyard);
+		}
 		
 		return listeners;
 	}
