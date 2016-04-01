@@ -151,6 +151,9 @@ class TCPClient implements Runnable {
 				case "/switchturn":
 					packet = new ClientPacket(PacketType.SwitchTurn, new byte[]{});
 					break;
+				case "/ban":
+					packet = ClientPacket.ban(tokens[1]);
+					break;
 				case "/accept":
 					
 					if (lastInviteData != null)

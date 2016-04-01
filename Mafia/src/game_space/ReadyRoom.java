@@ -35,6 +35,7 @@ public class ReadyRoom{
 	private GameSpace game;
 	private int id;
 	private boolean allReady;
+	private ArrayList<String> banList;	
 
 	public ReadyRoom(SelectServer s, int id, int roomsize){
 		NUM_PLAYERS_REQ = roomsize;
@@ -42,6 +43,7 @@ public class ReadyRoom{
 		server = s;
 		playerList = new ArrayList<Player>();
 		observerList = new ArrayList<Player>();
+		banList = new ArrayList<String>();
 		changeState(State.NotReady);
 	}
 
@@ -53,6 +55,7 @@ public class ReadyRoom{
 		return id;
 	}
 	
+	// returns true if not a duplicate
 	public boolean checkDupe(Player player)
 	{
 		String name = player.getUsername();
@@ -80,9 +83,32 @@ public class ReadyRoom{
 		return result;
 	}
 	
+	//return false if in banList
+	public boolean checkBanList(Player player)
+	{
+		String name = player.getUsername();
+		String ip = player.getIPAddress().toString();
+		
+		boolean result = true;
+		
+		for (int i = 0; i < banList.size(); i++) {
+			String banName = banList.get(i);
+			
+			if (name.equals(banName))
+			{
+				result = false;
+				break;
+			}
+		}
+		
+		return result;
+	}
+	
 	public boolean joinRoom(Player player) {
 		String[] playerInfo = {player.getIPAddress(), player.getPseudonym()};
 		boolean canAdd = checkDupe(player);
+		if (canAdd)
+			canAdd = checkBanList(player);
 		
 		//add player to list
 		if (canAdd) {
@@ -189,5 +215,20 @@ public class ReadyRoom{
 
 	public ArrayList<Player> getObservers() {
 		return observerList;
+	}
+
+	public void banUser(Player banPlayer) {		
+		banList.add(banPlayer.getUsername());
+		banPlayer.leaveRoom();
+	}
+
+	public Player findPlayer(String username) 
+	{
+		for (Player p : playerList)
+		{
+			if (p.getUsername().equals(username))
+				return p;		
+		}
+		return null;
 	}
 }

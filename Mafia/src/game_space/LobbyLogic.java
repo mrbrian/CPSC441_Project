@@ -1,6 +1,7 @@
 package game_space;
 
 import client.ClientPacket;
+import client.packets.ClientBanPacket;
 import client.packets.ClientInvitePacket;
 import client.packets.ClientJoinPacket;
 import players.Player;
@@ -24,6 +25,23 @@ public abstract class LobbyLogic {
 	public void processPacket(ClientPacket p, Player player){
 		switch(p.type)
 		{
+			case Ban:
+			{
+				String msg = new String(p.data, 0, p.dataSize);
+				ClientBanPacket cbp = new ClientBanPacket(p);
+				Player bannedPlayer = room.findPlayer(cbp.username); 
+				if (bannedPlayer != null)
+				{
+					room.banUser(bannedPlayer);
+					String showStr = String.format("%s has been banned from the room.", player.getUsername());
+					room.sendMessageRoom(showStr);
+				}
+				else
+				{
+					room.sendMessageRoom(cbp.username + " was not found.");
+				}
+			}
+			break;
 			case Chat:
 			{
 				String msg = new String(p.data, 0, p.dataSize);

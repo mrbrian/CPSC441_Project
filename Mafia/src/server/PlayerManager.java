@@ -52,7 +52,7 @@ public class PlayerManager implements Iterable<Player>
     public Player findPlayer(String findIp)
     {
     	for (Player p :players) {
-			if (p.getIPAddress().equals(findIp))
+    		if (p.getIPAddress().equals(findIp))
 				return p;
 		}
 		return null;    	

@@ -25,7 +25,8 @@ public class ClientPacket {
 		StartGame,
 		SwitchTurn,
 		Observe,
-		Leave
+		Leave,
+		Ban
 	}
 	
 	public PacketType type;
@@ -123,9 +124,13 @@ public class ClientPacket {
 		
 		return new ClientJoinPacket(PacketType.Observe, data);
 	}
-	
+
 	public static ClientPacket invite(String username){
 		return new ClientPacket(PacketType.Invite, username.getBytes());
+	}
+
+	public static ClientPacket ban(String username){
+		return new ClientPacket(PacketType.Ban, username.getBytes());
 	}
 	
 	public static ClientPacket listUser(){
