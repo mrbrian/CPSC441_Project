@@ -1,7 +1,5 @@
 package server;
 
-import java.awt.SecondaryLoop;
-
 /*
  * A simple TCP select server that accepts multiple connections and echo message back to the clients
  * For use in CPSC 441 lectures
@@ -21,7 +19,6 @@ import game_space.ReadyRoom.State;
 import players.Player;
 import players.Player.PlayerState;
 import server.FileIO;
-import server.ServerPacket.PacketType;
 
 public class SelectServer 
 {
@@ -138,6 +135,7 @@ public class SelectServer
 
 	    	case Observe:
 	    		{
+	    			//make sure player has a pseudonym before they can use join
 	    			if (player.getPseudonym() != null) {
 	    			
 	    				// try to join
@@ -339,7 +337,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	        	    		Outbox.sendMessage("Welcome!\nCommands: \"/login <user> <pwd>\" or \"/createaccount <user> <pwd>\"", cchannel);                    
+	        	    		Outbox.sendMessage("Welcome!", cchannel);                    
 	                    } 
 	                    else 
 	                    {
@@ -361,15 +359,15 @@ public class SelectServer
 	                            	int bytesRecv = cchannel.read(inBuffer);
 		                            if (bytesRecv <= 0)
 		                            {
-		                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));		 
-	                            		plyr_mgr.disconnect(p);
+		                                System.out.println(String.format("[%s]: read() error, or connection closed", p.getUsername()));		                                
+		                            	plyr_mgr.disconnect(p);
 		                                key.cancel();  // deregister the socket
 		                                continue;
 		                            }
 	                            }
 	                            catch(Exception e)
 	                            {
-                            		plyr_mgr.disconnect(p);
+	                            	plyr_mgr.disconnect(p);
 	                                System.out.println("Canceling..");
 	                                
 	                                key.cancel();  // deregister the socket	                            	
