@@ -1,5 +1,7 @@
 package server;
 
+import java.awt.SecondaryLoop;
+
 /*
  * A simple TCP select server that accepts multiple connections and echo message back to the clients
  * For use in CPSC 441 lectures
@@ -132,7 +134,29 @@ public class SelectServer
     			player.setPseudonym(pseudo);
     			Outbox.sendMessage("Alias set to: " + pseudo, ch);
 	    		break;
-	    	
+
+	    	case Observe:
+	    		{
+	    			if (player.getPseudonym() != null) {
+	    			
+	    				// try to join
+	    				ClientJoinPacket cjp = new ClientJoinPacket(p);
+		    		
+	    				ReadyRoom room = room_mgr.findRoom(cjp.roomId);
+	    				
+	    				if (room != null) {
+	    					room.observeRoom(player);	
+	    					int rmIdx = room.getId();
+	    					Outbox.sendMessage(String.format("You are now observing room #%d", rmIdx), ch);
+	    				} else {
+	    					Outbox.sendMessage("No such room. Use '/createroom rooomid' or observe a room that already exists",ch);
+	    				}
+	    			} else {
+	    				String msg = "You must use '/setalias' to choose a pseudonym before you can observe a room";
+	    				Outbox.sendMessage(msg, ch);	
+	    			}
+	    		}
+	    		break;
 	    	case Join:
 	    		{
 	    			//make sure player has a pseudonym before they can use join
@@ -146,8 +170,6 @@ public class SelectServer
 	    				if (room != null) {
 	    					room.joinRoom(player);	
 	    					int rmIdx = room.getId();
-	    					System.out.println(String.format("Join [%s]: %d", player.getUsername(), rmIdx));
-	
 	    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
 	    				} else {
 	    					Outbox.sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
@@ -183,6 +205,8 @@ public class SelectServer
 	    		break;
 
 	    	case Logout:
+	    		Outbox.sendMessage("Goodbye!", player.getChannel());
+
 	    		int roomID = player.getRoomIndex();
 	    		
 	    		if (roomID != -1) {  //then in a game
@@ -190,7 +214,6 @@ public class SelectServer
 	    			GameSpace game = room.getGameSpace();
 	    			game.removePlayer(player);	    			
 	    		}
-	    		
 	    		//now remove player from the player manager
 	    		plyr_mgr.removePlayer(player);
 	    		player.getChannel().socket().close();
@@ -200,19 +223,26 @@ public class SelectServer
 	    		
 	    		Iterator<Player> playerList = plyr_mgr.iterator();
 	    		
-	    		while(playerList.hasNext()){
-	    			String element = playerList.next().getUsername().toString();
-	    			System.out.println(element);
-	    			Outbox.sendMessage(element, ch);
-	    		}   		
+	    		String userlist = "Online users: ";
 	    		
+	    		while(playerList.hasNext()){
+	    			String username = playerList.next().getUsername().toString();
+	    			userlist += username;
+	    			if (playerList.hasNext())
+	    				userlist += ", ";
+	    		}   		
+				userlist += ".";
+    			Outbox.sendMessage(userlist, ch);	    		
 	    		break;
 	    	case ShowState:
 	    		Outbox.sendMessage(player.stateString(), ch);
 	    		break;
     		default:
-    			System.out.println(String.format("%s [%s]", p.type.toString(), socketAddress.toString()));
-    			Outbox.sendMessage(String.format("Could not process command: %s",  p.type.toString()), ch);
+	    		{
+	    			String str = String.format("Could not process command: %s, %s",  p.type.toString(), ch.toString());
+	    			System.out.println(str);
+	    			Outbox.sendMessage(str, ch);
+	    		}
     			break;
     	}
     }
@@ -307,7 +337,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	        	    		Outbox.sendMessage("Welcome!", cchannel);                    
+	        	    		Outbox.sendMessage("Welcome!\nCommands: \"/login <user> <pwd>\" or \"/createaccount <user> <pwd>\"", cchannel);                    
 	                    } 
 	                    else 
 	                    {

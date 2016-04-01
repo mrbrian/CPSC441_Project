@@ -3,6 +3,8 @@ package client;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import client.packets.ClientJoinPacket;
+
 public class ClientPacket {
 	private static final int USR_PASS_LENGTHS = 4;
 	
@@ -22,7 +24,9 @@ public class ClientPacket {
 		ShowState,
 		StartGame,
 		SwitchTurn,
-		Leave
+		Observe,
+		Leave,
+		Ban
 	}
 	
 	public PacketType type;
@@ -94,8 +98,8 @@ public class ClientPacket {
 	public static ClientPacket setAlias(String alias){
 		return new ClientPacket(PacketType.SetAlias, alias.getBytes());
 	}
-	
-	public static ClientPacket join(int roomId){
+
+	public static ClientJoinPacket join(int roomId){
 		int totalSize = 4;
 		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
 		
@@ -105,11 +109,28 @@ public class ClientPacket {
 		byte[] data = new byte[totalSize];
 		buffer.get(data);
 		
-		return new ClientPacket(PacketType.Join, data);
+		return new ClientJoinPacket(PacketType.Join, data);
 	}
 	
+	public static ClientJoinPacket observe(int roomId){
+		int totalSize = 4;
+		ByteBuffer buffer = ByteBuffer.allocate(totalSize);
+		
+		buffer.putInt(roomId);
+		buffer.flip();
+		
+		byte[] data = new byte[totalSize];
+		buffer.get(data);
+		
+		return new ClientJoinPacket(PacketType.Observe, data);
+	}
+
 	public static ClientPacket invite(String username){
 		return new ClientPacket(PacketType.Invite, username.getBytes());
+	}
+
+	public static ClientPacket ban(String username){
+		return new ClientPacket(PacketType.Ban, username.getBytes());
 	}
 	
 	public static ClientPacket listUser(){

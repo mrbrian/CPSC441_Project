@@ -1,7 +1,7 @@
 package players;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 
@@ -21,7 +21,6 @@ public class Player {
 	private String pseudonym;
 	
 	private String IPAddress;
-	private int portNumber;
 	private SocketChannel channel;
 	private PlayerTypes.PlayerType playerType;
 	
@@ -80,14 +79,6 @@ public class Player {
 
 	public void setIPAddress(String s){
 		IPAddress = s;
-	}
-
-	public void setPortNumber(int portNumber){
-		this.portNumber = portNumber;
-	}
-	
-	public int getPortNumber(){
-		return portNumber;
 	}
 	
 	// Set the players pseudonym 
@@ -151,9 +142,8 @@ public class Player {
 		if (ch == null)
 			return;
 		try{
-			InetSocketAddress addr = (InetSocketAddress)(ch.getRemoteAddress());
-			setPortNumber(addr.getPort());
-			setIPAddress(addr.getAddress().toString());
+			SocketAddress addr = ch.getRemoteAddress();
+			setIPAddress(addr.toString());
 		}
 		catch(IOException e)
 		{
@@ -162,11 +152,10 @@ public class Player {
 	}	
 	
 	public String stateString(){
-		String result = String.format("Username: %s\nPseudonym: %s\nIP addr: %s\nPort: %d\nChannel: %s\nPlayerType: %s\nState: %s\nRoomIndex: %d\nisAlive: %s\n",
+		String result = String.format("Username: %s\nPseudonym: %s\nIP addr: %s\nChannel: %s\nPlayerType: %s\nState: %s\nRoomIndex: %d\nisAlive: %s\n",
 				username,
 				pseudonym,
 				IPAddress, 
-				portNumber,
 				channel,
 				playerType,
 				state,

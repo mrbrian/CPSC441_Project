@@ -1,7 +1,6 @@
 package server;
 
 import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -13,9 +12,10 @@ public class PlayerManager implements Iterable<Player>
 	private static PlayerManager instance;
 	private ArrayList<Player> players;
 	private SelectServer server;
-	
+
 	public PlayerManager(SelectServer s)
 	{
+		instance = this;
 		server = s;
 		players = new ArrayList<Player>();	
 	}
@@ -31,10 +31,28 @@ public class PlayerManager implements Iterable<Player>
 		return findPlayer(socketAddress.toString());    	
     }
 
+    public static Player findPlayerByName(String username)
+    {
+    	int found = 0;
+    	Player foundPlayer = null;
+    	
+		for (Player p : instance.players)
+		{
+			if (username.equals(p.getUsername()))
+			{
+				found++;
+				foundPlayer = p;
+			}
+		}
+		if (found == 1)
+			return foundPlayer;
+		return null;
+    }
+
     public Player findPlayer(String findIp)
     {
     	for (Player p :players) {
-			if (p.getIPAddress().equals(findIp))
+    		if (p.getIPAddress().equals(findIp))
 				return p;
 		}
 		return null;    	

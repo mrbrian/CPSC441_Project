@@ -21,7 +21,7 @@ public class ServerPacket
 		Disconnect
 	}
 	
-	public PacketType pType;
+	public ServerPacket.PacketType pType;
 	public int msgLength;
 	public int dataSize;
 	public String msg;
