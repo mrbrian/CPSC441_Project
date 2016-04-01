@@ -185,6 +185,8 @@ public class SelectServer
 	    	case Logout:
 	    		int roomID = player.getRoomIndex();
 	    		
+	    		Outbox.sendMessage("\nYou have successfully logged out.\nIn order to log back in, you must restart the game.\n", ch);
+	    		
 	    		if (roomID != -1) {  //then in a game
 	    			room = room_mgr.findRoom(roomID);
 	    			GameSpace game = room.getGameSpace();
@@ -194,6 +196,7 @@ public class SelectServer
 	    		//now remove player from the player manager
 	    		plyr_mgr.removePlayer(player);
 	    		player.getChannel().socket().close();
+	    		
 	    		break;
 
 	    	case ListUsers:
@@ -203,7 +206,6 @@ public class SelectServer
 	    		while(playerList.hasNext()){
 	    			String element = playerList.next().getUsername().toString();
 	    			System.out.println(element);
-	    			Outbox.sendMessage(element, ch);
 	    		}   		
 	    		
 	    		break;
