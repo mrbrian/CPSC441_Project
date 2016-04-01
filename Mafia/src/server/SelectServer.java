@@ -12,6 +12,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 import client.ClientPacket;
+import server.ServerPacket.PacketType;
 import client.packets.*;
 import game_space.GameSpace;
 import game_space.ReadyRoom;
