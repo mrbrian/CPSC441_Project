@@ -35,6 +35,7 @@ public abstract class LobbyLogic {
 					room.banUser(bannedPlayer);
 					String showStr = String.format("%s has been banned from the room.", player.getUsername());
 					room.sendMessageRoom(showStr);
+					Outbox.sendMessage("You have been banned from room #" + room.getId() + "\nLeaving room...", bannedPlayer.getChannel());
 				}
 				else
 				{

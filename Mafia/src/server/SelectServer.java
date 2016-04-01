@@ -167,10 +167,17 @@ public class SelectServer
 		    		
 	    				ReadyRoom room = room_mgr.findRoom(cjp.roomId);
 	    				
-	    				if (room != null) {
-	    					room.joinRoom(player);	
-	    					int rmIdx = room.getId();
-	    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    				if (room != null) 
+	    				{
+	    					if (room.joinRoom(player))
+	    					{
+		    					int rmIdx = room.getId();
+		    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    					}
+	    					else 
+	    					{
+		    					Outbox.sendMessage(String.format("You could not join room #%d", cjp.roomId), ch);
+							}
 	    				} else {
 	    					Outbox.sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
 	    				}
