@@ -33,7 +33,7 @@ public abstract class LobbyLogic {
 				if (bannedPlayer != null)
 				{
 					room.banUser(bannedPlayer);
-					String showStr = String.format("%s has been banned from the room.", player.getUsername());
+					String showStr = String.format("%s has been banned from the room.", bannedPlayer.getUsername());
 					room.sendMessageRoom(showStr);
 				}
 				else
@@ -68,9 +68,15 @@ public abstract class LobbyLogic {
 
 				Player target = PlayerManager.findPlayerByName(cip.invited);				
 				Outbox.sendPacket(out_pkt, target.getChannel());
-				player.leaveRoom();				
+				//player.leaveRoom();				
 			}
 			break;
+			case Join:
+			{
+				String showStr = String.format("Cannot join a game in this state");
+				Outbox.sendMessage(showStr, player.getChannel());
+			}
+			
 			default:
 				Outbox.sendMessage(String.format("Bad room command: %s", p.type.toString()), player.getChannel());
 				break;

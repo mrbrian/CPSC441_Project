@@ -20,7 +20,8 @@ public class ReadyRoom{
 		NotReady,
 		Beginning,
 		GameInProgress,
-		GameOver
+		GameOver,
+		Paused
 	}
 	
 	public final int NUM_PLAYERS_REQ;
@@ -125,6 +126,10 @@ public class ReadyRoom{
 		return playerList;
 	}
 	
+	public ArrayList<Player> getObserverList() {
+		return observerList;
+	}
+	
 	public GameSpace getGameSpace() {
 		return game;
 	}
@@ -155,14 +160,17 @@ public class ReadyRoom{
 				logic = new LobbyLogic_NotReady(this, playerList);
 				break;
 			case GameInProgress:
-				beginGame();
 				logic = new LobbyLogic_GameInProgress(this, game);
 				break;
 			case Beginning:
-				logic = new LobbyLogic_Beginning(this);
+				beginGame();
+				logic = new LobbyLogic_Beginning(this, game);
 				break;
 			case GameOver:
 				logic = new LobbyLogic_GameOver(this);
+				break;
+			case Paused:
+				logic = new LobbyLogic_Paused(this, game);
 				break;
 		}
 		

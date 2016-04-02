@@ -99,7 +99,7 @@ class TCPClient implements Runnable {
 				case "/join":
 					if (tokens.length >= 2) {
 						
-						System.out.println(tokens[1]);
+						//System.out.println(tokens[1]);
 						
 						packet = ClientPacket.join(Integer.parseInt(tokens[1]));
 					} else {
@@ -132,7 +132,7 @@ class TCPClient implements Runnable {
 				case "/createroom":
 					if (tokens.length >= 2) {
 						
-						System.out.println(tokens[1]);
+						//System.out.println(tokens[1]);
 						
 						packet = ClientPacket.createRoom(Integer.parseInt(tokens[1]));
 					} else {

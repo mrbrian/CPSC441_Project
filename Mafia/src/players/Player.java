@@ -169,5 +169,6 @@ public class Player {
 		room.getPlayerList().remove(this);
 		roomIndex = -1;		
 		state = PlayerState.Logged_In;
+		isAlive = true;
 	}
 }
