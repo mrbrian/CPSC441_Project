@@ -21,6 +21,7 @@ public class LobbyLogic_Paused extends LobbyLogic {
 	
 	public void update(float elapsedTime)
 	{
+		room.updatePauseOffset((double)elapsedTime);
 		boolean disconnected = false;
 		for (Player p : room.getPlayerList()) {
 			if (p.getChannel() == null)
@@ -28,7 +29,7 @@ public class LobbyLogic_Paused extends LobbyLogic {
 		}
 		if (disconnected == false) {
 			room.sendMessageRoom("All players have reconnected, continuing last turn (votes have been reset)...");
-			game.setSwitchTime(game.getSwitchTime() - (long)elapsedTime); 
+			//game.setSwitchTime(game.getSwitchTime() + room.getPauseOffset()); 
 			room.changeState(State.GameInProgress);
 		}
 	}

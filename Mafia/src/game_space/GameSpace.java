@@ -18,9 +18,9 @@ public class GameSpace{
 	private int lynchCount = 0;
 	private int murderCount = 0;
 	private long dayTime = 300000;		//300000ms = 5min
-	private long nightTime = 150000;	//150000ms = 2.5min
+	private long nightTime = 30000;//150000;	//150000ms = 2.5min
 	private long voteTime = 60000; // = 1min
-	private long switchTime = 0;
+	private double switchTime = 0.0;
 	private long voteBegin = 0;
 	
 	private ArrayList<Player> players = null;
@@ -62,7 +62,7 @@ public class GameSpace{
 		return innocent;
 	}
 	
-	public int updateState(long callTime) {
+	public int updateState(double callTime) {
 		if (switchTime == 0) {
 			switchTime = callTime;
 			nextDay();
@@ -262,11 +262,11 @@ public class GameSpace{
 		lynchCount = 0;
 		murderCount = 0;
 	}
-	public long getSwitchTime() {
+	public double getSwitchTime() {
 		return switchTime;
 	}
 	
-	public void setSwitchTime(long t) {
+	public void setSwitchTime(double t) {
 		switchTime = t;
 	}
 	

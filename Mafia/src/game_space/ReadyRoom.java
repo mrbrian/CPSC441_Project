@@ -36,7 +36,8 @@ public class ReadyRoom{
 	private GameSpace game;
 	private int id;
 	private boolean allReady;
-	private ArrayList<String> banList;	
+	private ArrayList<String> banList;
+	private double pauseOffset = 0.0;
 
 	public ReadyRoom(SelectServer s, int id, int roomsize){
 		NUM_PLAYERS_REQ = roomsize;
@@ -47,6 +48,19 @@ public class ReadyRoom{
 		banList = new ArrayList<String>();
 		changeState(State.NotReady);
 	}
+	
+	public double getPauseOffset() {
+		return pauseOffset;
+	}
+	
+	public void setPauseOffset(double t) {
+		pauseOffset = t;
+	}
+	
+	public void updatePauseOffset(double t) {
+		pauseOffset += t;
+	}
+	
 
 	public ReadyRoom(SelectServer s, int id){
 		this(s, id, NUM_PLAYERS_REQ_DEFAULT);		

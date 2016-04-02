@@ -29,11 +29,11 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 	{
 		super(r);
 		game = g;
-		oldState = 2;
 	}
 	
 	public void update(float elapsedTime)
 	{
+		//elapsedTime = (long)elapsedTime - room.getPauseOffset();
 		//System.out.println(room.getPlayerList().size());
 		for (Player p : room.getPlayerList()) {
 			if (p.getChannel() == null) {
@@ -60,7 +60,8 @@ public class LobbyLogic_GameInProgress extends LobbyLogic{
 		else {	
 			timer += elapsedTime;
 			currTime = new Date();
-			currState = game.updateState(currTime.getTime());
+			currState = game.updateState((double)currTime.getTime() - room.getPauseOffset());
+			System.out.println(room.getPauseOffset());
 			if (oldState != currState) {
 				oldState = currState;
 				if (currState == 1) {
