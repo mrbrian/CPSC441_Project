@@ -1,9 +1,11 @@
 package server;
 
+import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import game_space.GameSpace;
 import players.Player;
 import players.Player.PlayerState;
 
@@ -68,6 +70,20 @@ public class PlayerManager implements Iterable<Player>
     }
 
     public void disconnect(Player p) {
+    	//now remove player from the player manager
+    	if (p.getState() == PlayerState.Disconnecting)
+    	{
+			removePlayer(p);
+			try
+			{
+				p.getChannel().close();
+			}
+			catch(IOException e)
+			{
+				System.out.println("disconnect error: " + e.getMessage());
+			}
+    	}
+    	
     	if (p != null)
     		p.setSocketChannel(null);	// set to null to show they disconnected
     	
@@ -102,5 +118,10 @@ public class PlayerManager implements Iterable<Player>
 		player.setPseudonym(player.getUsername());
 		player.setState(PlayerState.Logged_In);
 						
+	}
+
+	public void logout(Player player) {
+		player.leaveRoom();
+		player.setState(PlayerState.Disconnecting);		
 	}
 }

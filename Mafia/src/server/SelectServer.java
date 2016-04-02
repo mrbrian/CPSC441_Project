@@ -1,7 +1,5 @@
 package server;
 
-import java.awt.SecondaryLoop;
-
 /*
  * A simple TCP select server that accepts multiple connections and echo message back to the clients
  * For use in CPSC 441 lectures
@@ -14,6 +12,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 import client.ClientPacket;
+import server.ServerPacket.PacketType;
 import client.packets.*;
 import game_space.GameSpace;
 import game_space.ReadyRoom;
@@ -137,6 +136,7 @@ public class SelectServer
 
 	    	case Observe:
 	    		{
+	    			//make sure player has a pseudonym before they can use join
 	    			if (player.getPseudonym() != null) {
 	    			
 	    				// try to join
@@ -167,10 +167,17 @@ public class SelectServer
 		    		
 	    				ReadyRoom room = room_mgr.findRoom(cjp.roomId);
 	    				
-	    				if (room != null) {
-	    					room.joinRoom(player);	
-	    					int rmIdx = room.getId();
-	    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    				if (room != null) 
+	    				{
+	    					if (room.joinRoom(player))
+	    					{
+		    					int rmIdx = room.getId();
+		    					Outbox.sendMessage(String.format("You are now in room #%d", rmIdx), ch);
+	    					}
+	    					else 
+	    					{
+		    					Outbox.sendMessage(String.format("You could not join room #%d", cjp.roomId), ch);
+							}
 	    				} else {
 	    					Outbox.sendMessage("No such room. Use '/createroom rooomid' or join a room that already exists",ch);
 	    				}
@@ -205,18 +212,12 @@ public class SelectServer
 	    		break;
 
 	    	case Logout:
-	    		Outbox.sendMessage("Goodbye!", player.getChannel());
-
-	    		int roomID = player.getRoomIndex();
-	    		
-	    		if (roomID != -1) {  //then in a game
-	    			room = room_mgr.findRoom(roomID);
-	    			GameSpace game = room.getGameSpace();
-	    			game.removePlayer(player);	    			
-	    		}
-	    		//now remove player from the player manager
-	    		plyr_mgr.removePlayer(player);
-	    		player.getChannel().socket().close();
+		    	{
+		    		ServerPacket p1 = new ServerPacket(PacketType.Disconnect, "Goodbye!", new byte[]{});
+		    		Outbox.sendPacket(p1, player.getChannel());
+	
+		    		plyr_mgr.logout(player);		    		
+		    	}
 	    		break;
 
 	    	case ListUsers:
@@ -337,7 +338,7 @@ public class SelectServer
 	                        Player plyr = new Player(cchannel);
 	        	    		plyr_mgr.addPlayer(plyr);	
 	        	    		
-	        	    		Outbox.sendMessage("Welcome!\nCommands: \"/login <user> <pwd>\" or \"/createaccount <user> <pwd>\"", cchannel);                    
+	        	    		Outbox.sendMessage("Welcome!", cchannel);                    
 	                    } 
 	                    else 
 	                    {

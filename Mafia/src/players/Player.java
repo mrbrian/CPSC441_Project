@@ -14,7 +14,8 @@ public class Player {
 	{		
 		Not_Logged_In,
 		Logged_In,
-		In_Room
+		In_Room,
+		Disconnecting
 	}
 	
 	private String username;
@@ -166,9 +167,18 @@ public class Player {
 
 	public void leaveRoom() {
 		ReadyRoom room = RoomManager.getInstance().findRoom(roomIndex);
-		room.getPlayerList().remove(this);
+
+		/*room.getPlayerList().remove(this);
 		roomIndex = -1;		
 		state = PlayerState.Logged_In;
-		isAlive = true;
+		isAlive = true;*/
+
+		if (room != null)
+		{
+			room.getPlayerList().remove(this);
+			roomIndex = -1;		
+			state = PlayerState.Logged_In;
+		}
+
 	}
 }

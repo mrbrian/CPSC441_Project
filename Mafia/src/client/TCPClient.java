@@ -41,6 +41,11 @@ class TCPClient implements Runnable {
 	{		
 		switch (p.pType)
 		{
+			case Disconnect:				
+				System.out.println(p.msg);	
+				System.out.println("Hit enter to continue...");	
+				terminate = true;
+				break;
 			case InviteNotify:				
 				lastInviteData = p.data;
 				System.out.println(String.format("%s", p.msg));				
@@ -235,7 +240,7 @@ class TCPClient implements Runnable {
 		        	isDataAvailable = inData.available();		        	
 		        }		        
 	        }
-	        
+	        thread.interrupt();//join();
 	        // Close the socket
 	        clientSocket.close();    
         }
@@ -255,7 +260,7 @@ class TCPClient implements Runnable {
 	        DataOutputStream outBuffer = new DataOutputStream(clientSocket.getOutputStream()); 
 	        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
 	
-	        while (!line.equals("logout"))
+	        while (!terminate)
 	        {
 		        //System.out.print("Please enter a message to be sent to the server ('logout' to terminate): \n");
 		        line = inFromUser.readLine();

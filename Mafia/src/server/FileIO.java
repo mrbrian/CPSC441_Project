@@ -36,13 +36,9 @@ public class FileIO {
 		File file = new File("../Mafia/src/user_save.txt");
 		boolean doesExist = false;
 		
-		System.out.println("doesExist before try: " + doesExist);
-		
 		try {
 			Scanner scanner = new Scanner(file);
 			int lineNum = 0;
-			
-			System.out.println("doesExist in try: " + doesExist);
 			
 			while(scanner.hasNextLine()){
 				String currLine = scanner.nextLine();
@@ -60,8 +56,6 @@ public class FileIO {
 			e.printStackTrace();
 		}
 		
-		System.out.println("doesExist after try: " + doesExist);
-		
 		return doesExist;
 	}
 	
@@ -78,9 +72,6 @@ public class FileIO {
 				String currLine = scanner.nextLine();
 				String[] splitUp = currLine.split(" ");
 				numLine++;
-				
-				System.out.println("username: " + username);
-				System.out.println("password: " + password);
 				
 				if(splitUp[0].equals(username) && splitUp[1].equals(password)){
 					isValid = true;
