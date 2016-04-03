@@ -66,7 +66,8 @@ public abstract class LobbyLogic {
 				ServerPacket out_pkt = new ServerPacket(PacketType.InviteNotify, inviteStr, sendJoin.toBytes()); 
 
 				Player target = PlayerManager.findPlayerByName(cip.invited);				
-				Outbox.sendPacket(out_pkt, target.getChannel());
+				if (target != null)
+					Outbox.sendPacket(out_pkt, target.getChannel());
 				//player.leaveRoom();				
 			}
 			break;
