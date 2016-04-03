@@ -175,6 +175,7 @@ public class Player {
 
 		if (room != null)
 		{
+			room.getObserverList().remove(this);
 			room.getPlayerList().remove(this);
 			roomIndex = -1;		
 			state = PlayerState.Logged_In;

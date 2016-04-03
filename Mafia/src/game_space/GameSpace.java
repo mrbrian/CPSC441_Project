@@ -304,5 +304,9 @@ public class GameSpace{
 		
 		return result;
 	}
+
+	public ArrayList<Player> getGraveyard() {
+		return graveyard;		
+	}
 }
 

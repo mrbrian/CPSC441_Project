@@ -29,7 +29,7 @@ public class ReadyRoom{
 	private LobbyLogic logic;
 	private State state;
 	
-	private static final int NUM_PLAYERS_REQ_DEFAULT = 4;
+	private static final int NUM_PLAYERS_REQ_DEFAULT = 8;
 	//playerList is 2-tuple string of (IP,pseudonym)
 	private ArrayList<Player> playerList;
 	private ArrayList<Player> observerList;
@@ -160,6 +160,7 @@ public class ReadyRoom{
 				logic = new LobbyLogic_NotReady(this, playerList);
 				break;
 			case GameInProgress:
+				game.getGraveyard().addAll(observerList);
 				logic = new LobbyLogic_GameInProgress(this, game);
 				break;
 			case Beginning:
@@ -216,6 +217,10 @@ public class ReadyRoom{
 	}
 
 	public void observeRoom(Player player) {
+		if (this.state == State.GameInProgress)
+		{
+			game.getGraveyard().add(player);
+		}
 		player.setState(PlayerState.In_Room);
 		player.setRoomIndex(this.id);
 		observerList.add(player);
