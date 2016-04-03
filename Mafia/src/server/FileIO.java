@@ -19,7 +19,7 @@ public class FileIO {
 		
 		try {
 			
-			BufferedWriter bw = new BufferedWriter(new FileWriter("../Mafia/src/user_save.txt", true));
+			BufferedWriter bw = new BufferedWriter(new FileWriter("src/user_save.txt", true));
 			bw.write(username + " " + password);
 			bw.newLine();
 			
@@ -33,7 +33,7 @@ public class FileIO {
 	
 	// Method to check if the user already exists in the server
 	public boolean doesUsrExist(String username){
-		File file = new File("../Mafia/src/user_save.txt");
+		File file = new File("src/user_save.txt");
 		boolean doesExist = false;
 		
 		try {
@@ -61,7 +61,7 @@ public class FileIO {
 	
 	// Checks if the credentials entered are valid
 	public boolean checkCredentials(String username, String password){
-		File file = new File("../Mafia/src/user_save.txt");
+		File file = new File("src/user_save.txt");
 		boolean isValid = false;
 		
 		try{
