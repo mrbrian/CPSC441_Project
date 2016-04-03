@@ -84,15 +84,15 @@ public class RoomManager implements Runnable{
 	public void run() {
 		while (!quit)
 		{
+			Date now = new Date();
+			double currTime = ((double)now.getTime()) / 1000;
+			float elapsedTime = (float)(currTime - last_update);
+			
 			for (ReadyRoom r : rooms)
-			{
-				Date now = new Date();
-				double currTime = ((double)now.getTime()) / 1000;
-				float elapsedTime = (float)(currTime - last_update);
-				
+			{				
 				r.update(elapsedTime);
-				last_update = currTime;
 			}
+			last_update = currTime;
 			try {
 				thread.sleep(100);
 			} catch (InterruptedException e) {

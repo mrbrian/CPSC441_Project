@@ -18,9 +18,7 @@ public abstract class LobbyLogic {
 		room = r;
 	}
 	
-	public void update(float elapsedTime){
-		
-	}
+	public abstract void update(float elapsedTime);	
 	
 	public void processPacket(ClientPacket p, Player player){
 		switch(p.type)
