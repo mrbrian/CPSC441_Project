@@ -13,12 +13,10 @@ public class PlayerManager implements Iterable<Player>
 {
 	private static PlayerManager instance;
 	private ArrayList<Player> players;
-	private SelectServer server;
 
 	public PlayerManager(SelectServer s)
 	{
 		instance = this;
-		server = s;
 		players = new ArrayList<Player>();	
 	}
 	
@@ -69,7 +67,9 @@ public class PlayerManager implements Iterable<Player>
     	players.remove(p);
     }
 
-    public void disconnect(Player p) {
+    public void disconnect(Player p) throws Exception{
+    	if (p == null)
+    		throw new Exception("disconnect: player is null");
     	//now remove player from the player manager
     	if (p.getState() == PlayerState.Disconnecting)
     	{
@@ -84,8 +84,7 @@ public class PlayerManager implements Iterable<Player>
 			}
     	}
     	
-    	if (p != null)
-    		p.setSocketChannel(null);	// set to null to show they disconnected
+		p.setSocketChannel(null);	// set to null to show they disconnected
     	
     	// to do: have a time limit they can be disconnected before they are removed from the player list?
     }
